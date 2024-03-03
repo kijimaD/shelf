@@ -17,6 +17,7 @@ func NewMainApp() *cli.App {
 	app.Commands = []*cli.Command{
 		CmdServer,
 		CmdGen,
+		CmdGenSingle,
 	}
 
 	return app

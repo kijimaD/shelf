@@ -1,4 +1,4 @@
-package src
+package shelf
 
 type TODOType string
 
