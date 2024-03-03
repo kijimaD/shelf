@@ -16,27 +16,41 @@ func TestFormatID(t *testing.T) {
 func TestFullname(t *testing.T) {
 	date := time.Date(2001, 1, 1, 1, 1, 1, 0, time.UTC)
 	{
-		result, err := GenFullname("aaa.pdf", date)
+		result, err := NewFullnameByRaw("aaa.pdf", date)
 		assert.NoError(t, err)
-		assert.Equal(t, "20010101T010101_aaa.pdf", string(result))
+		assert.Equal(t, "20010101T010101_aaa.pdf", result.String())
 	}
 	{
-		result, err := GenFullname("aaa.epub", date)
+		result, err := NewFullnameByRaw("aaa.epub", date)
 		assert.NoError(t, err)
-		assert.Equal(t, "20010101T010101_aaa.epub", string(result))
+		assert.Equal(t, "20010101T010101_aaa.epub", result.String())
 	}
 	{
-		result, err := GenFullname("あああ.epub", date)
+		result, err := NewFullnameByRaw("あああ.epub", date)
 		assert.NoError(t, err)
-		assert.Equal(t, "20010101T010101_あああ.epub", string(result))
+		assert.Equal(t, "20010101T010101_あああ.epub", result.String())
 	}
 	{
-		_, err := GenFullname("aaa", date)
+		_, err := NewFullnameByRaw("aaa", date)
 		assert.Error(t, err)
 	}
 }
 
 func TestLoadFullname(t *testing.T) {
-	_, err := LoadFullname("20010101T010101_aaa.pdf")
-	assert.NoError(t, err)
+	{
+		_, err := NewFullname("20010101T010101_aaa.pdf")
+		assert.NoError(t, err)
+	}
+	{
+		_, err := NewFullname("20010101T010101_あああ.pdf")
+		assert.NoError(t, err)
+	}
+	{
+		_, err := NewFullname("20010101T010101_aaa")
+		assert.Error(t, err)
+	}
+	{
+		_, err := NewFullname("INVALID_20010101T010101_aaa.pdf")
+		assert.Error(t, err)
+	}
 }

@@ -10,45 +10,54 @@ import (
 
 const IDFormat = "20060102T150405"
 
-// "{id}_{base}.{ext}"
-type Fullname string
-
-// 20240303T201703
 func formatID(t time.Time) string {
 	return t.Format(IDFormat)
 }
 
-// Fullnameの文字列からFullnameを生成する
-func LoadFullname(full string) (Fullname, error) {
-	pattern := `(?P<id>\w{15})_(?P<name>.*)\.`
+// "{id}_{base}.{ext}"
+type Fullname struct {
+	id   string // ID
+	base string // 任意の文字列
+	ext  string // 拡張子
+}
+
+// フル文字列からFullnameを生成する
+func NewFullname(full string) (*Fullname, error) {
+	ext := filepath.Ext(full)
+	if ext == "" {
+		return nil, fmt.Errorf("拡張子がない")
+	}
+
+	pattern := `^(?P<id>\w{15})_(?P<base>.*)\.\w*$`
 	re, err := regexp.Compile(pattern)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	matches := re.FindAllStringSubmatch(full, -1)
-	for _, match := range matches {
-		fmt.Printf("ID: %s, Name: %s\n", match[re.SubexpIndex("id")], match[re.SubexpIndex("name")])
+	if len(matches) < 1 {
+		return nil, fmt.Errorf("マッチしなかった")
 	}
+	id := matches[0][re.SubexpIndex("id")]
+	base := matches[0][re.SubexpIndex("base")]
 
-	return "", nil
+	return &Fullname{id: id, base: base, ext: ext}, nil
 }
 
 // IDなしファイル名からFullnameを生成する
-func GenFullname(origin string, t time.Time) (Fullname, error) {
+func NewFullnameByRaw(origin string, t time.Time) (*Fullname, error) {
 	// 拡張子がなければエラー
 	ext := filepath.Ext(origin)
 	if ext == "" {
-		return "", fmt.Errorf("拡張子がない")
+		return nil, fmt.Errorf("拡張子がない")
 	}
 
 	id := formatID(t)
 	base := strings.TrimSuffix(origin, ext)
-	result := fmt.Sprintf("%s_%s%s", id, base, ext)
 
-	return Fullname(result), nil
+	return &Fullname{id: id, base: base, ext: ext}, nil
 }
 
-func (full *Fullname) ID() {
-
+func (f *Fullname) String() string {
+	return fmt.Sprintf("%s_%s%s", f.id, f.base, f.ext)
 }
