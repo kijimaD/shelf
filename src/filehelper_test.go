@@ -68,7 +68,7 @@ func TestMetaFilename(t *testing.T) {
 		fullname, err := NewFullname("20010101T010101_aaa.pdf")
 		assert.NoError(t, err)
 		result := fullname.MetaFilename()
-		assert.Equal(t, "20010101T010101_aaa.toml", result)
+		assert.Equal(t, "20010101T010101.toml", result)
 	}
 }
 
@@ -118,12 +118,12 @@ tags = ["new"]
 	assert.Equal(t, expect, buf.String())
 }
 
-func TestTouchMetafile(t *testing.T) {
+func TestBlankMetafile(t *testing.T) {
 	fullname, err := NewFullname("20010101T010101_abc.pdf")
 	assert.NoError(t, err)
 
 	buf := bytes.Buffer{}
-	assert.NoError(t, fullname.touchMetafile(&buf))
+	assert.NoError(t, fullname.blankMetafile(&buf))
 	expect := `title = "abc"
 todo = "NONE"
 tags = ["new"]

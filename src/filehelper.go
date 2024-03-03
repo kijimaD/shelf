@@ -78,7 +78,7 @@ func (f *Fullname) String() string {
 }
 
 func (f *Fullname) MetaFilename() string {
-	return fmt.Sprintf("%s_%s.toml", f.id, f.base)
+	return fmt.Sprintf("%s.toml", f.id)
 }
 
 // 元のパスを返す
@@ -95,7 +95,8 @@ func (f *Fullname) writeMetafile(book Book, w io.Writer) error {
 	return nil
 }
 
-func (f *Fullname) touchMetafile(w io.Writer) error {
+// サンプルのメタファイル設定を書き込む
+func (f *Fullname) blankMetafile(w io.Writer) error {
 	book := Book{
 		Title: f.base,
 		TODO:  TODOTypeNONE,
