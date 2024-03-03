@@ -72,6 +72,34 @@ func TestMetaFilename(t *testing.T) {
 	}
 }
 
+func TestOriginalFilename(t *testing.T) {
+	date := time.Date(2001, 1, 1, 1, 1, 1, 0, time.UTC)
+	{
+		fullname, err := NewFullnameByRaw("aaa.pdf", date)
+		assert.NoError(t, err)
+		result := fullname.OriginalFilename()
+		assert.Equal(t, "aaa.pdf", result)
+	}
+	{
+		fullname, err := NewFullnameByRaw("aaa/bbb.pdf", date)
+		assert.NoError(t, err)
+		result := fullname.OriginalFilename()
+		assert.Equal(t, "aaa/bbb.pdf", result)
+	}
+	{
+		fullname, err := NewFullnameByRaw("aaa/bbb.pdf", date)
+		assert.NoError(t, err)
+		result := fullname.OriginalFilename()
+		assert.Equal(t, "aaa/bbb.pdf", result)
+	}
+	{
+		fullname, err := NewFullnameByRaw("/aaa/bbb.pdf", date)
+		assert.NoError(t, err)
+		result := fullname.OriginalFilename()
+		assert.Equal(t, "/aaa/bbb.pdf", result)
+	}
+}
+
 func TestWriteMetafile(t *testing.T) {
 	fullname, err := NewFullname("20010101T010101_aaa.pdf")
 	assert.NoError(t, err)
@@ -111,11 +139,15 @@ func TestRename(t *testing.T) {
 	{
 		fullname, err := NewFullnameByRaw(tmpfile.Name(), date)
 		assert.NoError(t, err)
-		newpath, err := fullname.rename(tmpfile.Name())
+		newpath, err := fullname.rename()
 		assert.NoError(t, err)
 
 		// 存在確認
 		_, err = os.Stat(newpath)
 		assert.NoError(t, err)
+
+		// 非存在確認
+		_, err = os.Stat(tmpfile.Name())
+		assert.Error(t, err)
 	}
 }
