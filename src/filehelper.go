@@ -2,7 +2,7 @@ package src
 
 import (
 	"fmt"
-	"os"
+	"io"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -69,19 +69,22 @@ func (f *Fullname) MetaFilename() string {
 	return fmt.Sprintf("%s_%s.toml", f.id, f.base)
 }
 
-func (f *Fullname) makeMetafile() error {
-	file, err := os.Create(f.MetaFilename())
+func (f *Fullname) writeMetafile(book Book, w io.Writer) error {
+	err := toml.NewEncoder(w).Encode(book)
 	if err != nil {
 		return err
 	}
-	defer file.Close()
 
+	return nil
+}
+
+func (f *Fullname) touchMetafile(w io.Writer) error {
 	book := Book{
-		Title: "タイトル",
+		Title: f.base,
 		TODO:  TODOTypeNONE,
 		Tags:  []string{"new"},
 	}
-	err = toml.NewEncoder(file).Encode(book)
+	err := f.writeMetafile(book, w)
 	if err != nil {
 		return err
 	}

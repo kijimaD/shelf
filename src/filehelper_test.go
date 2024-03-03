@@ -1,6 +1,7 @@
 package src
 
 import (
+	"bytes"
 	"testing"
 	"time"
 
@@ -64,8 +65,33 @@ func TestMetaFilename(t *testing.T) {
 	}
 }
 
-func TestMakeMetafile(t *testing.T) {
+func TestWriteMetafile(t *testing.T) {
 	fullname, err := NewFullname("20010101T010101_aaa.pdf")
 	assert.NoError(t, err)
-	assert.NoError(t, fullname.makeMetafile())
+
+	book := Book{
+		Title: fullname.base,
+		TODO:  TODOTypeNONE,
+		Tags:  []string{"new"},
+	}
+	buf := bytes.Buffer{}
+	assert.NoError(t, fullname.writeMetafile(book, &buf))
+	expect := `title = "aaa"
+todo = "NONE"
+tags = ["new"]
+`
+	assert.Equal(t, expect, buf.String())
+}
+
+func TestTouchMetafile(t *testing.T) {
+	fullname, err := NewFullname("20010101T010101_abc.pdf")
+	assert.NoError(t, err)
+
+	buf := bytes.Buffer{}
+	assert.NoError(t, fullname.touchMetafile(&buf))
+	expect := `title = "abc"
+todo = "NONE"
+tags = ["new"]
+`
+	assert.Equal(t, expect, buf.String())
 }
