@@ -2,10 +2,13 @@ package src
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/BurntSushi/toml"
 )
 
 const IDFormat = "20060102T150405"
@@ -60,4 +63,28 @@ func NewFullnameByRaw(origin string, t time.Time) (*Fullname, error) {
 
 func (f *Fullname) String() string {
 	return fmt.Sprintf("%s_%s%s", f.id, f.base, f.ext)
+}
+
+func (f *Fullname) MetaFilename() string {
+	return fmt.Sprintf("%s_%s.toml", f.id, f.base)
+}
+
+func (f *Fullname) makeMetafile() error {
+	file, err := os.Create(f.MetaFilename())
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	book := Book{
+		Title: "タイトル",
+		TODO:  TODOTypeNONE,
+		Tags:  []string{"new"},
+	}
+	err = toml.NewEncoder(file).Encode(book)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

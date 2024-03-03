@@ -54,3 +54,18 @@ func TestLoadFullname(t *testing.T) {
 		assert.Error(t, err)
 	}
 }
+
+func TestMetaFilename(t *testing.T) {
+	{
+		fullname, err := NewFullname("20010101T010101_aaa.pdf")
+		assert.NoError(t, err)
+		result := fullname.MetaFilename()
+		assert.Equal(t, "20010101T010101_aaa.toml", result)
+	}
+}
+
+func TestMakeMetafile(t *testing.T) {
+	fullname, err := NewFullname("20010101T010101_aaa.pdf")
+	assert.NoError(t, err)
+	assert.NoError(t, fullname.makeMetafile())
+}
