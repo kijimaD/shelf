@@ -3,6 +3,8 @@ package src
 import (
 	"fmt"
 	"io"
+	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -18,9 +20,10 @@ func formatID(t time.Time) string {
 }
 
 // "{id}_{base}.{ext}"
+// ディレクトリに関する情報は持たない
 type Fullname struct {
 	id   string // ID
-	base string // 任意の文字列
+	base string // ファイル名(ディレクトリ名を含まない)
 	ext  string // 拡張子
 }
 
@@ -56,7 +59,7 @@ func NewFullnameByRaw(origin string, t time.Time) (*Fullname, error) {
 	}
 
 	id := formatID(t)
-	base := strings.TrimSuffix(origin, ext)
+	base := strings.TrimSuffix(path.Base(origin), ext)
 
 	return &Fullname{id: id, base: base, ext: ext}, nil
 }
@@ -90,4 +93,16 @@ func (f *Fullname) touchMetafile(w io.Writer) error {
 	}
 
 	return nil
+}
+
+// 同じ階層でIDつきパスにリネームする
+func (f *Fullname) rename(oldpath string) (string, error) {
+	dir := filepath.Dir(oldpath)
+	newpath := filepath.Join(dir, f.String())
+	err := os.Rename(oldpath, newpath)
+	if err != nil {
+		return "", err
+	}
+
+	return newpath, nil
 }
