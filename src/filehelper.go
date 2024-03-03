@@ -40,7 +40,7 @@ func NewFullname(full string) (*Fullname, error) {
 	if err != nil {
 		return nil, err
 	}
-	matches := re.FindAllStringSubmatch(full, -1)
+	matches := re.FindAllStringSubmatch(filepath.Base(full), -1)
 	if len(matches) < 1 {
 		return nil, fmt.Errorf("マッチしなかった")
 	}
@@ -77,12 +77,18 @@ func (f *Fullname) String() string {
 	return fmt.Sprintf("%s_%s%s", f.id, f.base, f.ext)
 }
 
+// ディレクトリ名を含まないメタファイルのパス
 func (f *Fullname) MetaFilename() string {
 	return fmt.Sprintf("%s.toml", f.id)
 }
 
+// ディレクトリ名を含むメタファイルのパス
+func (f *Fullname) MetaPath() string {
+	return filepath.Join(f.dir, f.MetaFilename())
+}
+
 // 元のパスを返す
-func (f *Fullname) OriginalFilename() string {
+func (f *Fullname) OriginalPath() string {
 	return filepath.Join(f.dir, f.base+f.ext)
 }
 
@@ -113,7 +119,7 @@ func (f *Fullname) blankMetafile(w io.Writer) error {
 // 同じ階層でIDつきパスにリネームする
 func (f *Fullname) rename() (string, error) {
 	newpath := filepath.Join(f.dir, f.String())
-	err := os.Rename(f.OriginalFilename(), newpath)
+	err := os.Rename(f.OriginalPath(), newpath)
 	if err != nil {
 		return "", err
 	}

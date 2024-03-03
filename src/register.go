@@ -11,7 +11,7 @@ func Register(path string) error {
 	if err != nil {
 		return err
 	}
-	file, err := os.Create(fullname.MetaFilename())
+	file, err := os.Create(fullname.MetaPath())
 	if err != nil {
 		return err
 	}
