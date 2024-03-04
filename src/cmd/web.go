@@ -14,8 +14,7 @@ var CmdWeb = &cli.Command{
 }
 
 func runWeb(_ *cli.Context) error {
-	r := routers.NewRouter()
-	if err := r.Run(routers.Config.Address); err != nil {
+	if err := routers.RunServer(); err != nil {
 		return err
 	}
 

@@ -1,48 +1,24 @@
 package routers
 
 import (
-	"io"
-	"log/slog"
+	"embed"
+	"fmt"
 	"net/http"
-	"os"
-
-	"github.com/gin-gonic/gin"
-	sloggin "github.com/samber/slog-gin"
 )
 
-func NewRouter() *gin.Engine {
-	gin.DefaultWriter = io.Discard
+//go:embed static/*
+var staticFS embed.FS
 
-	r := gin.Default()
-	l := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-		Level: GetSlogLogLevel(Config.LogLevel),
-	}))
-	l = l.With("logtype", "resplog")
-	slog.SetDefault(l)
-	config := sloggin.Config{
-		DefaultLevel:       slog.LevelInfo,
-		ClientErrorLevel:   slog.LevelWarn,
-		ServerErrorLevel:   slog.LevelError,
-		WithUserAgent:      true,
-		WithRequestID:      true,
-		WithRequestBody:    true,
-		WithRequestHeader:  false,
-		WithResponseBody:   true,
-		WithResponseHeader: false,
-		WithSpanID:         false,
-		WithTraceID:        false,
-	}
-	r.Use(sloggin.NewWithConfig(l, config))
-
-	r.LoadHTMLGlob("./templates/*.html")
-	r.GET("/", func(c *gin.Context) {
-		c.HTML(
-			http.StatusOK,
-			"index.html",
-			gin.H{},
-		)
+func RunServer() error {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "top page")
 	})
-	r.Static("/file", ".")
 
-	return r
+	http.Handle("/static/", http.FileServer(http.FS(staticFS)))
+
+	if err := http.ListenAndServe(fmt.Sprintf(":%d", Config.Port), nil); err != nil {
+		return err
+	}
+
+	return nil
 }
