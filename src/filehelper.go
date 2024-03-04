@@ -13,6 +13,7 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
+const DocExtension = ".pdf"
 const IDFormat = "20060102T150405"
 
 func formatID(t time.Time) string {

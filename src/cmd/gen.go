@@ -11,25 +11,24 @@ import (
 
 var CmdGen = &cli.Command{
 	Name:        "gen",
-	Usage:       "generate [DIRECTORY] [EXT]",
+	Usage:       "generate [DIRECTORY]",
 	Description: "generate files in directory",
 	Action:      runGen,
 	Flags:       []cli.Flag{},
 }
 
 func runGen(c *cli.Context) error {
-	if c.NArg() < 2 {
-		return errors.New("gen [DIRECTORY] [EXT]")
+	if c.NArg() < 1 {
+		return errors.New("gen [DIRECTORY]")
 	}
 	dir := c.Args().Get(0)
-	ext := c.Args().Get(1)
 
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return err
 	}
 	for _, file := range files {
-		if filepath.Ext(file.Name())[1:] != ext {
+		if filepath.Ext(file.Name()) != shelf.DocExtension {
 			continue
 		}
 		filePath := filepath.Join(dir, file.Name())
