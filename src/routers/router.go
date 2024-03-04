@@ -3,6 +3,7 @@ package routers
 import (
 	"io"
 	"log/slog"
+	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -32,6 +33,16 @@ func NewRouter() *gin.Engine {
 		WithTraceID:        false,
 	}
 	r.Use(sloggin.NewWithConfig(l, config))
+
+	r.LoadHTMLGlob("./templates/*.html")
+	r.GET("/", func(c *gin.Context) {
+		c.HTML(
+			http.StatusOK,
+			"index.html",
+			gin.H{},
+		)
+	})
+	r.Static("/file", ".")
 
 	return r
 }
