@@ -13,9 +13,9 @@ func NewMainApp() *cli.App {
 	app.Description = "shelf is simple document management tool."
 	app.Version = "v0.0.0"
 	app.EnableBashCompletion = true
-	app.DefaultCommand = CmdServer.Name
+	app.DefaultCommand = CmdWeb.Name
 	app.Commands = []*cli.Command{
-		CmdServer,
+		CmdWeb,
 		CmdGen,
 		CmdGenSingle,
 	}
