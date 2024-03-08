@@ -125,13 +125,13 @@ func TestWriteMetafile(t *testing.T) {
 	fullname, err := NewFullname("20010101T010101_aaa.pdf")
 	assert.NoError(t, err)
 
-	book := Book{
+	meta := Meta{
 		Title: fullname.base,
 		TODO:  TODOTypeNONE,
 		Tags:  []string{"new"},
 	}
 	buf := bytes.Buffer{}
-	assert.NoError(t, fullname.writeMetafile(book, &buf))
+	assert.NoError(t, fullname.writeMetafile(meta, &buf))
 	expect := `title = "aaa"
 todo = "NONE"
 tags = ["new"]

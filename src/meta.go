@@ -9,7 +9,7 @@ var (
 	TODOTypeDONE TODOType = "DONE"
 )
 
-type Book struct {
+type Meta struct {
 	Title string   `toml:"title"`
 	TODO  TODOType `toml:"todo"`
 	Tags  []string `toml:"tags"`

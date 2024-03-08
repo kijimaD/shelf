@@ -95,8 +95,8 @@ func (f *Fullname) OriginalPath() string {
 	return filepath.Join(f.dir, f.base+f.ext)
 }
 
-func (f *Fullname) writeMetafile(book Book, w io.Writer) error {
-	err := toml.NewEncoder(w).Encode(book)
+func (f *Fullname) writeMetafile(meta Meta, w io.Writer) error {
+	err := toml.NewEncoder(w).Encode(meta)
 	if err != nil {
 		return err
 	}
@@ -106,12 +106,12 @@ func (f *Fullname) writeMetafile(book Book, w io.Writer) error {
 
 // サンプルのメタファイル設定を書き込む
 func (f *Fullname) blankMetafile(w io.Writer) error {
-	book := Book{
+	meta := Meta{
 		Title: f.base,
 		TODO:  TODOTypeNONE,
 		Tags:  []string{"new"},
 	}
-	err := f.writeMetafile(book, w)
+	err := f.writeMetafile(meta, w)
 	if err != nil {
 		return err
 	}
