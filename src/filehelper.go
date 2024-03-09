@@ -14,8 +14,9 @@ import (
 )
 
 const (
-	DocExtension = ".pdf"
-	IDFormat     = "20060102T150405"
+	DocExtension  = ".pdf"
+	MetaExtension = ".toml"
+	IDFormat      = "20060102T150405"
 )
 
 func formatID(t time.Time) string {
@@ -128,4 +129,14 @@ func (f *Fullname) rename() (string, error) {
 	}
 
 	return newpath, nil
+}
+
+// メタファイルが存在するか検証
+func (f *Fullname) ExistMetaFile() bool {
+	_, err := os.Stat(filepath.Join(f.dir, f.MetaFilename()))
+	if err != nil {
+		return false
+	}
+
+	return true
 }
