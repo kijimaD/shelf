@@ -24,7 +24,6 @@ func GenerateFiler(dirpath string) []Filer {
 		if err != nil {
 			continue
 		}
-		fmt.Printf("%#v\n", pathobj)
 		if pathobj.ExistMetaFile() {
 			fmt.Println(dirpath)
 			fmt.Println("存在する")

@@ -46,20 +46,36 @@ func TestFullname(t *testing.T) {
 
 func TestLoadFullname(t *testing.T) {
 	{
-		_, err := NewFullname("20010101T010101_aaa.pdf")
+		full, err := NewFullname("20010101T010101_aaa.pdf")
 		assert.NoError(t, err)
+		expect := Fullname{
+			id:   "20010101T010101",
+			dir:  ".",
+			base: "aaa",
+			ext:  ".pdf",
+		}
+		assert.Equal(t, &expect, full)
 	}
 	{
-		_, err := NewFullname("20010101T010101_あああ.pdf")
+		full, err := NewFullname("20010101T010101_あああ.pdf")
 		assert.NoError(t, err)
+		expect := Fullname{
+			id:   "20010101T010101",
+			dir:  ".",
+			base: "あああ",
+			ext:  ".pdf",
+		}
+		assert.Equal(t, &expect, full)
 	}
 	{
-		_, err := NewFullname("20010101T010101_aaa")
+		full, err := NewFullname("20010101T010101_aaa")
 		assert.Error(t, err)
+		assert.Nil(t, full)
 	}
 	{
-		_, err := NewFullname("INVALID_20010101T010101_aaa.pdf")
+		full, err := NewFullname("INVALID_20010101T010101_aaa.pdf")
 		assert.Error(t, err)
+		assert.Nil(t, full)
 	}
 }
 
