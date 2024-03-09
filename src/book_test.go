@@ -2,9 +2,11 @@ package shelf
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
+	"github.com/BurntSushi/toml"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -78,5 +80,42 @@ func TestMetaPath(t *testing.T) {
 		metapath, err := b.MetaPath()
 		assert.NoError(t, err)
 		assert.Equal(t, "/tmp/20010101T010101.toml", metapath)
+	})
+}
+
+func TestLoadMetaData(t *testing.T) {
+	t.Run("メタデータを読み込める", func(t *testing.T) {
+		tempfile, err := os.CreateTemp(os.TempDir(), "20010101T010101_*.pdf")
+		assert.NoError(t, err)
+		defer os.Remove(tempfile.Name())
+
+		metafile, err := os.CreateTemp(os.TempDir(), "20010101T010101.toml")
+		assert.NoError(t, err)
+		defer os.Remove(metafile.Name())
+		// CreateTempで作るファイルには末尾に番号がつくので、リネーム
+		newPath := filepath.Join(filepath.Dir(metafile.Name()), "20010101T010101.toml")
+		assert.NoError(t, os.Rename(metafile.Name(), newPath))
+		defer os.Remove(newPath)
+
+		meta := Meta{
+			Title: "hello",
+			TODO:  TODOTypeNONE,
+			Tags:  []string{"new"},
+		}
+		assert.NoError(t, toml.NewEncoder(metafile).Encode(meta))
+
+		b, err := NewBook(*tempfile)
+		assert.NoError(t, err)
+		assert.NoError(t, b.LoadMetaData())
+		assert.Equal(t, meta, b.Meta) // 読み込めている
+	})
+	t.Run("メタファイルがないときはエラーを返す", func(t *testing.T) {
+		tempfile, err := os.CreateTemp(os.TempDir(), "20010101T010101_*.pdf")
+		assert.NoError(t, err)
+		defer os.Remove(tempfile.Name())
+
+		b, err := NewBook(*tempfile)
+		assert.NoError(t, err)
+		assert.Error(t, b.LoadMetaData())
 	})
 }

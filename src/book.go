@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"time"
+
+	"github.com/BurntSushi/toml"
 )
 
 const ShelfRegexp = `^(?P<id>\w{15})_(?P<base>.*)\.\w*$`
@@ -26,6 +28,8 @@ type Book struct {
 }
 
 func NewBook(file os.File) (*Book, error) {
+	book := Book{File: file}
+
 	fileinfo, err := file.Stat()
 	if err != nil {
 		return nil, err
@@ -35,16 +39,31 @@ func NewBook(file os.File) (*Book, error) {
 		return nil, err
 	}
 
-	// TODO: 用意する
-	book := Book{
-		File: file,
-		Meta: Meta{Title: "example", TODO: TODOTypeNONE, Tags: []string{}},
-	}
-
 	return &book, nil
 }
 
-func (b Book) GetID() (BookID, error) {
+func (b *Book) LoadMetaData() error {
+	metapath, err := b.MetaPath()
+	if err != nil {
+		return err
+	}
+	metafile, err := os.Open(metapath)
+	if err != nil {
+		return err
+	}
+	defer metafile.Close()
+
+	meta := Meta{}
+	_, err = toml.NewDecoder(metafile).Decode(&meta)
+	if err != nil {
+		return err
+	}
+	b.Meta = meta
+
+	return nil
+}
+
+func (b *Book) GetID() (BookID, error) {
 	fileinfo, err := b.File.Stat()
 	if err != nil {
 		return "", err
@@ -58,7 +77,7 @@ func (b Book) GetID() (BookID, error) {
 	return BookID(id), nil
 }
 
-func (b Book) GetFullPath() (string, error) {
+func (b *Book) GetFullPath() (string, error) {
 	// このやり方は正しくなさそう
 	// UnixライクOS限定
 	fd := int(b.File.Fd())
@@ -70,7 +89,7 @@ func (b Book) GetFullPath() (string, error) {
 	return fullPath, nil
 }
 
-func (b Book) MetaPath() (string, error) {
+func (b *Book) MetaPath() (string, error) {
 	fullpath, err := b.GetFullPath()
 	if err != nil {
 		return "", err
@@ -82,6 +101,7 @@ func (b Book) MetaPath() (string, error) {
 	return filepath.Join(dir, filename), nil
 }
 
+// IDを返す
 func executeShelfRegexp(raw string) (string, error) {
 	re, err := regexp.Compile(ShelfRegexp)
 	if err != nil {
@@ -89,7 +109,7 @@ func executeShelfRegexp(raw string) (string, error) {
 	}
 	matches := re.FindAllStringSubmatch(filepath.Base(raw), -1)
 	if len(matches) < 1 {
-		return "", fmt.Errorf("shelfフォーマットにマッチしなかった")
+		return "", fmt.Errorf("shelfフォーマットにマッチしなかった: %s", raw)
 	}
 
 	return matches[0][re.SubexpIndex("id")], nil
