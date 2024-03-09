@@ -21,5 +21,4 @@ func TestGenerateMeta(t *testing.T) {
 	}
 
 	GenerateFiler(tempdir)
-
 }

@@ -11,14 +11,14 @@ type Filer struct {
 	Meta     Meta
 }
 
-// カレントディレクトリから、メタデータを収集する
+// ディレクトリから、メタデータを収集する
 func GenerateFiler(dirpath string) []Filer {
 	filers := []Filer{}
 	files, _ := ioutil.ReadDir(dirpath)
 
 	for _, f := range files {
 		// IDのついたパターンにマッチするものを拾う
-		// 本体とメタファイルが同時に存在するものを拾う
+		// 本体とメタファイルが存在するものを拾う
 		// IDの一覧を取得して、両方アクセスする
 		pathobj, err := NewFullname(f.Name())
 		if err != nil {

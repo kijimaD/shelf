@@ -32,7 +32,7 @@ type Fullname struct {
 	ext  string // 拡張子
 }
 
-// フル文字列からFullnameを生成する
+// ファイル名からFullnameを生成する
 func NewFullname(full string) (*Fullname, error) {
 	ext := filepath.Ext(full)
 	if ext == "" {
@@ -133,7 +133,7 @@ func (f *Fullname) rename() (string, error) {
 
 // メタファイルが存在するか検証
 func (f *Fullname) ExistMetaFile() bool {
-	_, err := os.Stat(filepath.Join(f.dir, f.MetaFilename()))
+	_, err := os.Stat(f.MetaPath())
 	if err != nil {
 		return false
 	}
