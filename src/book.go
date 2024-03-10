@@ -13,7 +13,12 @@ import (
 	"github.com/unidoc/unipdf/v3/model"
 )
 
-const ShelfRegexp = `^(?P<id>\w{15})_(?P<base>.*)\.\w*$`
+const (
+	ShelfRegexp   = `^(?P<id>\w{15})_(?P<base>.*)\.\w*$`
+	IDFormat      = "20060102T150405"
+	DocExtension  = ".pdf"
+	MetaExtension = ".toml"
+)
 
 // ファイル名の一部となるID
 // 読み書きで使う
@@ -61,6 +66,9 @@ func (b *Book) GetMetaData() (*Meta, error) {
 	_, err = toml.NewDecoder(metafile).Decode(&meta)
 	if err != nil {
 		return nil, err
+	}
+	if meta.Title == nil || meta.TODO == nil || meta.Tags == nil {
+		return nil, fmt.Errorf("メタファイルから取得できなかった項目がある")
 	}
 
 	return &meta, nil
@@ -123,9 +131,9 @@ func (b *Book) writeBlankMetaFile(w io.Writer) error {
 	}
 
 	meta := Meta{
-		Title: title,
-		TODO:  TODOTypeNONE,
-		Tags:  []string{"new"},
+		Title: GetPtr(title),
+		TODO:  GetPtr(TODOTypeNONE),
+		Tags:  GetPtr([]string{"new"}),
 	}
 	err = toml.NewEncoder(w).Encode(meta)
 	if err != nil {

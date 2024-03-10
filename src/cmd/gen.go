@@ -29,9 +29,6 @@ func runGen(c *cli.Context) error {
 		return err
 	}
 	for _, file := range files {
-		if filepath.Ext(file.Name()) != shelf.DocExtension {
-			continue
-		}
 		filePath := filepath.Join(dir, file.Name())
 		f, err := os.Open(filePath)
 		if err != nil {

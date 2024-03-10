@@ -99,9 +99,9 @@ func TestLoadMetaData(t *testing.T) {
 		defer os.Remove(newPath)
 
 		meta := Meta{
-			Title: "hello",
-			TODO:  TODOTypeNONE,
-			Tags:  []string{"new"},
+			Title: GetPtr("hello"),
+			TODO:  GetPtr(TODOTypeNONE),
+			Tags:  GetPtr([]string{"new"}),
 		}
 		assert.NoError(t, toml.NewEncoder(metafile).Encode(meta))
 
@@ -110,6 +110,24 @@ func TestLoadMetaData(t *testing.T) {
 		loadedMeta, err := b.GetMetaData()
 		assert.NoError(t, err)
 		assert.Equal(t, meta, *loadedMeta)
+	})
+	t.Run("メタファイルが空の場合エラーを返す", func(t *testing.T) {
+		tempfile, err := os.CreateTemp(os.TempDir(), "20010101T010101_*.pdf")
+		assert.NoError(t, err)
+		defer os.Remove(tempfile.Name())
+
+		metafile, err := os.CreateTemp(os.TempDir(), "20010101T010101.toml")
+		assert.NoError(t, err)
+		defer os.Remove(metafile.Name())
+		// CreateTempで作るファイルには末尾に番号がつくので、リネーム
+		newPath := filepath.Join(filepath.Dir(metafile.Name()), "20010101T010101.toml")
+		assert.NoError(t, os.Rename(metafile.Name(), newPath))
+		defer os.Remove(newPath)
+
+		b, err := NewBook(*tempfile)
+		assert.NoError(t, err)
+		_, err = b.GetMetaData()
+		assert.Error(t, err)
 	})
 	t.Run("メタファイルがないときはエラーを返す", func(t *testing.T) {
 		tempfile, err := os.CreateTemp(os.TempDir(), "20010101T010101_*.pdf")
