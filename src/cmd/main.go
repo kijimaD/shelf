@@ -18,6 +18,7 @@ func NewMainApp() *cli.App {
 		CmdWeb,
 		CmdGen,
 		CmdGenSingle,
+		CmdExtractImage,
 	}
 
 	return app
