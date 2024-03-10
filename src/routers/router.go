@@ -8,10 +8,16 @@ import (
 	"net/http"
 	"path/filepath"
 	"strings"
+
+	shelf "github.com/kijimaD/shelf/src"
 )
 
 //go:embed static/*
 var staticFS embed.FS
+
+type Content struct {
+	Views []shelf.View
+}
 
 func RunServer() error {
 	http.HandleFunc("/", indexHandler)
@@ -39,13 +45,9 @@ func RunServer() error {
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	t := template.Must(template.ParseFiles("templates/index.html"))
-	if err := t.Execute(w, struct {
-		Title string
-		URL   string
-	}{
-		Title: "this is title",
-		URL:   "http://localhost:8020/static/pdfjs/web/viewer.html?file=http://localhost:8020/dir/example.pdf",
-	}); err != nil {
+	views := shelf.GenerateViews(Config.ServeBase)
+	content := Content{Views: views}
+	if err := t.Execute(w, content); err != nil {
 		log.Fatal(err)
 	}
 }
