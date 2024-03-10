@@ -18,10 +18,15 @@ import (
 )
 
 const (
-	ShelfRegexp   = `^(?P<id>\w{24})_(?P<base>.*)\.\w*$`
+	ShelfRegexp   = `^(?P<id>\w{24})_(?P<base>.*)\.pdf$`
 	IDFormat      = "20060102T150405"
 	DocExtension  = ".pdf"
 	MetaExtension = ".toml"
+)
+
+var (
+	ErrInputDir    = fmt.Errorf("ファイルを入力を想定している箇所でディレクトリが入力された")
+	ErrInputNotPDF = fmt.Errorf("PDF以外が入力された")
 )
 
 // ファイル名の一部となるID
@@ -43,12 +48,18 @@ type Book struct {
 
 // shelfフォーマットを満たすファイルなのを確認して初期化する
 func NewBook(file os.File) (*Book, error) {
-	book := Book{File: file}
-
+	if filepath.Ext(file.Name()) != DocExtension {
+		return nil, ErrInputNotPDF
+	}
 	fileinfo, err := file.Stat()
 	if err != nil {
 		return nil, err
 	}
+	if fileinfo.IsDir() {
+		return nil, ErrInputDir
+	}
+
+	book := Book{File: file}
 	_, err = executeShelfRegexp(fileinfo.Name())
 	if err != nil {
 		return nil, err
@@ -149,14 +160,15 @@ func (b *Book) writeBlankMetaFile(w io.Writer) error {
 	return nil
 }
 
-func (b *Book) extractImageBase64() (string, error) {
+func (b *Book) ExtractImageBase64() (string, error) {
 	// PDFファイルを解析
 	pdfReader, err := model.NewPdfReader(&b.File)
 	if err != nil {
 		return "", err
 	}
+
 	// ページを抽出
-	pageNum := 1 // 1ページ目
+	pageNum := 1
 	page, err := pdfReader.GetPage(pageNum)
 	if err != nil {
 		return "", err

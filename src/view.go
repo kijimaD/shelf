@@ -46,7 +46,7 @@ func GenerateViews(dirpath string) []View {
 			log.Println("メタ情報がなかった")
 			continue
 		}
-		base64Str, err := book.extractImageBase64()
+		base64Str, err := book.ExtractImageBase64()
 		if err != nil {
 			log.Println(err)
 			continue
