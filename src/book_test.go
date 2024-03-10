@@ -131,7 +131,6 @@ func TestExtractPDFTitle(t *testing.T) {
 	defer srcfile.Close()
 	content, err := ioutil.ReadAll(srcfile)
 	assert.NoError(t, err)
-
 	_, err = tempfile.Write(content)
 	assert.NoError(t, err)
 
@@ -140,4 +139,39 @@ func TestExtractPDFTitle(t *testing.T) {
 
 	_, err = b.ExtractPDFTitle()
 	assert.NoError(t, err)
+}
+
+func TestWriteBlankMetaFile(t *testing.T) {
+	tempfile, err := os.CreateTemp(os.TempDir(), "20010101T010101_*.pdf")
+	assert.NoError(t, err)
+	defer os.Remove(tempfile.Name())
+
+	// PDFタイトルを取得する関係で、中身を実際のPDFにしておく
+	srcfile, err := os.Open("../example.pdf")
+	assert.NoError(t, err)
+	defer srcfile.Close()
+	content, err := ioutil.ReadAll(srcfile)
+	assert.NoError(t, err)
+	_, err = tempfile.Write(content)
+	assert.NoError(t, err)
+
+	// 中身なしのメタファイル
+	metafile, err := os.CreateTemp(os.TempDir(), "20010101T010101.toml")
+	assert.NoError(t, err)
+	defer os.Remove(metafile.Name())
+
+	b, err := NewBook(*tempfile)
+	assert.NoError(t, err)
+	assert.NoError(t, b.writeBlankMetaFile(metafile))
+
+	// 再度開いて中身を確認する
+	metafile, err = os.Open(metafile.Name())
+	assert.NoError(t, err)
+	metacontent, err := ioutil.ReadAll(metafile)
+	assert.NoError(t, err)
+	expect := `title = "example"
+todo = "NONE"
+tags = ["new"]
+`
+	assert.Equal(t, expect, string(metacontent))
 }

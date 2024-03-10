@@ -2,6 +2,8 @@ package shelf
 
 import (
 	"fmt"
+	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -118,6 +120,30 @@ func (b *Book) ExtractPDFTitle() (string, error) {
 	}
 
 	return "", nil
+}
+
+// 初期生成用にブランクのメタファイルを生成して書き込む
+func (b *Book) writeBlankMetaFile(w io.Writer) error {
+	title := "PDF Title"
+	extract, err := b.ExtractPDFTitle()
+	if err != nil {
+		log.Println("PDFタイトルを取得できなかった")
+	}
+	if extract != "" {
+		title = extract
+	}
+
+	meta := Meta{
+		Title: title,
+		TODO:  TODOTypeNONE,
+		Tags:  []string{"new"},
+	}
+	err = toml.NewEncoder(w).Encode(meta)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // IDを返す
