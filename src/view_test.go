@@ -20,13 +20,13 @@ func TestGenerateViews(t *testing.T) {
 	example, err := io.ReadAll(examplefile)
 	assert.NoError(t, err)
 	{
-		fname := filepath.Join(tempdir, "20010101T010101_abc.pdf")
+		fname := filepath.Join(tempdir, "20010101T010101123456789_abc.pdf")
 		f, err := os.Create(fname)
 		assert.NoError(t, err)
 		_, err = f.Write(example)
 	}
 	{
-		fname := filepath.Join(tempdir, "20010101T010101.toml")
+		fname := filepath.Join(tempdir, "20010101T010101123456789.toml")
 		f, err := os.Create(fname)
 		assert.NoError(t, err)
 		meta := Meta{
@@ -37,13 +37,13 @@ func TestGenerateViews(t *testing.T) {
 		assert.NoError(t, toml.NewEncoder(f).Encode(meta))
 	}
 	{
-		fname := filepath.Join(tempdir, "20010101T010102_def.pdf")
+		fname := filepath.Join(tempdir, "20010101T010102123456789_def.pdf")
 		f, err := os.Create(fname)
 		assert.NoError(t, err)
 		_, err = f.Write(example)
 	}
 	{
-		fname := filepath.Join(tempdir, "20010101T010102.toml")
+		fname := filepath.Join(tempdir, "20010101T010102123456789.toml")
 		f, err := os.Create(fname)
 		assert.NoError(t, err)
 		meta := Meta{

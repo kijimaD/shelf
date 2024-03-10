@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	ShelfRegexp   = `^(?P<id>\w{15})_(?P<base>.*)\.\w*$`
+	ShelfRegexp   = `^(?P<id>\w{24})_(?P<base>.*)\.\w*$`
 	IDFormat      = "20060102T150405"
 	DocExtension  = ".pdf"
 	MetaExtension = ".toml"
@@ -29,7 +29,9 @@ const (
 type BookID string
 
 func NewBookID(t time.Time) BookID {
-	return BookID(t.Format(IDFormat))
+	nano := t.Nanosecond()
+	formatted := fmt.Sprintf("%s%09d", t.Format(IDFormat), nano)
+	return BookID(formatted)
 }
 
 // shelfフォーマットを満たすファイル
