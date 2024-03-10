@@ -64,7 +64,7 @@ func TestGetFullPath(t *testing.T) {
 
 		b, err := NewBook(*tempfile)
 		assert.NoError(t, err)
-		fullpath, err := b.GetFullPath()
+		fullpath := b.GetFullPath()
 		assert.Contains(t, fullpath, "/tmp/20010101T010101_")
 		assert.Contains(t, fullpath, ".pdf")
 	})
@@ -141,6 +141,16 @@ func TestExtractPDFTitle(t *testing.T) {
 
 	_, err = b.ExtractPDFTitle()
 	assert.NoError(t, err)
+}
+
+func TestGenerateShelfPath(t *testing.T) {
+	tempfile, err := os.CreateTemp(os.TempDir(), "test_*.pdf")
+	assert.NoError(t, err)
+	defer os.Remove(tempfile.Name())
+
+	path := generateShelfPath(*tempfile, time.Date(2001, 11, 11, 11, 11, 11, 0, time.UTC))
+	assert.Contains(t, path, "/tmp/20011111T111111_test")
+	assert.Contains(t, path, ".pdf")
 }
 
 func TestWriteBlankMetaFile(t *testing.T) {

@@ -30,6 +30,7 @@ type Book struct {
 	File os.File
 }
 
+// shelfフォーマットを満たすファイルなのを確認して初期化する
 func NewBook(file os.File) (*Book, error) {
 	book := Book{File: file}
 
@@ -79,23 +80,12 @@ func (b *Book) GetID() (BookID, error) {
 	return BookID(id), nil
 }
 
-func (b *Book) GetFullPath() (string, error) {
-	// このやり方は正しくなさそう
-	// UnixライクOS限定
-	fd := int(b.File.Fd())
-	fullPath, err := os.Readlink(fmt.Sprintf("/proc/self/fd/%d", fd))
-	if err != nil {
-		return "", err
-	}
-
-	return fullPath, nil
+func (b *Book) GetFullPath() string {
+	return b.File.Name()
 }
 
 func (b *Book) MetaPath() (string, error) {
-	fullpath, err := b.GetFullPath()
-	if err != nil {
-		return "", err
-	}
+	fullpath := b.GetFullPath()
 	dir := filepath.Dir(fullpath)
 	id, _ := b.GetID()
 	filename := fmt.Sprintf("%s.toml", id)
@@ -145,8 +135,20 @@ func (b *Book) writeBlankMetaFile(w io.Writer) error {
 	return nil
 }
 
+// shelf対応のパスに変換して返す
+func generateShelfPath(file os.File, time time.Time) string {
+	id := NewBookID(time)
+	fileName := filepath.Base(file.Name())
+	base := fileName[:len(fileName)-len(filepath.Ext(fileName))] // 拡張子を除去する
+	shelfFileName := fmt.Sprintf("%s_%s.pdf", id, base)
+	dir := filepath.Join(filepath.Dir(file.Name()))
+	shelfpath := filepath.Join(dir, shelfFileName)
+
+	return shelfpath
+}
+
 // IDを返す
-func executeShelfRegexp(raw string) (string, error) {
+func executeShelfRegexp(raw string) (BookID, error) {
 	re, err := regexp.Compile(ShelfRegexp)
 	if err != nil {
 		return "", err
@@ -156,5 +158,5 @@ func executeShelfRegexp(raw string) (string, error) {
 		return "", fmt.Errorf("shelfフォーマットにマッチしなかった: %s", raw)
 	}
 
-	return matches[0][re.SubexpIndex("id")], nil
+	return BookID(matches[0][re.SubexpIndex("id")]), nil
 }
