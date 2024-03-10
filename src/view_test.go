@@ -1,6 +1,7 @@
 package shelf
 
 import (
+	"io"
 	"os"
 	"path/filepath"
 	"testing"
@@ -12,9 +13,17 @@ import (
 func TestGenerateViews(t *testing.T) {
 	// 残らなくて便利なので他のテストでもt.TempDir()を使っていきたい
 	tempdir := t.TempDir()
+
+	examplefile, err := os.Open("../fixture/example.pdf")
+	assert.NoError(t, err)
+	defer examplefile.Close()
+	example, err := io.ReadAll(examplefile)
+	assert.NoError(t, err)
 	{
 		fname := filepath.Join(tempdir, "20010101T010101_abc.pdf")
-		assert.NoError(t, os.WriteFile(fname, []byte(""), 0666))
+		f, err := os.Create(fname)
+		assert.NoError(t, err)
+		_, err = f.Write(example)
 	}
 	{
 		fname := filepath.Join(tempdir, "20010101T010101.toml")
@@ -29,8 +38,9 @@ func TestGenerateViews(t *testing.T) {
 	}
 	{
 		fname := filepath.Join(tempdir, "20010101T010102_def.pdf")
-		assert.NoError(t, os.WriteFile(fname, []byte(""), 0666))
-
+		f, err := os.Create(fname)
+		assert.NoError(t, err)
+		_, err = f.Write(example)
 	}
 	{
 		fname := filepath.Join(tempdir, "20010101T010102.toml")

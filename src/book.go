@@ -1,7 +1,10 @@
 package shelf
 
 import (
+	"bytes"
+	"encoding/base64"
 	"fmt"
+	"image/png"
 	"io"
 	"log"
 	"os"
@@ -11,6 +14,7 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/unidoc/unipdf/v3/model"
+	"github.com/unidoc/unipdf/v3/render"
 )
 
 const (
@@ -141,6 +145,34 @@ func (b *Book) writeBlankMetaFile(w io.Writer) error {
 	}
 
 	return nil
+}
+
+func (b *Book) extractImageBase64() (string, error) {
+	// PDFファイルを解析
+	pdfReader, err := model.NewPdfReader(&b.File)
+	if err != nil {
+		return "", err
+	}
+	// ページを抽出
+	pageNum := 1 // 1ページ目
+	page, err := pdfReader.GetPage(pageNum)
+	if err != nil {
+		return "", err
+	}
+
+	device := render.NewImageDevice()
+	image, err := device.Render(page)
+	if err != nil {
+		return "", err
+	}
+	var buf bytes.Buffer
+	if err := png.Encode(&buf, image); err != nil {
+		return "", err
+	}
+	str := buf.Bytes()
+	imgBase64Str := base64.StdEncoding.EncodeToString(str)
+
+	return imgBase64Str, nil
 }
 
 // shelf対応のパスに変換して返す

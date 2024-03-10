@@ -8,8 +8,9 @@ import (
 )
 
 type View struct {
-	FilePath string
-	Meta     Meta
+	FilePath  string
+	Meta      Meta
+	Thumbnail string // base64エンコード
 }
 
 // ディレクトリから、メタデータを収集する
@@ -45,9 +46,16 @@ func GenerateViews(dirpath string) []View {
 			log.Println("メタ情報がなかった")
 			continue
 		}
+		base64Str, err := book.extractImageBase64()
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+
 		view := View{
-			FilePath: book.GetFullPath(),
-			Meta:     *meta,
+			FilePath:  book.GetFullPath(),
+			Meta:      *meta,
+			Thumbnail: base64Str,
 		}
 		views = append(views, view)
 	}

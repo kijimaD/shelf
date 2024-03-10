@@ -4,6 +4,9 @@ go 1.21.5
 
 require (
 	github.com/BurntSushi/toml v1.3.2 // indirect
+	github.com/adrg/strutil v0.1.0 // indirect
+	github.com/adrg/sysfont v0.1.1 // indirect
+	github.com/adrg/xdg v0.2.1 // indirect
 	github.com/bytedance/sonic v1.9.1 // indirect
 	github.com/caarlos0/env/v10 v10.0.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
@@ -33,6 +36,7 @@ require (
 	github.com/trimmer-io/go-xmp v1.0.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.11 // indirect
+	github.com/unidoc/freetype v0.2.3 // indirect
 	github.com/unidoc/pkcs7 v0.2.0 // indirect
 	github.com/unidoc/timestamp v0.0.0-20200412005513-91597fd3793a // indirect
 	github.com/unidoc/unipdf/v3 v3.55.0 // indirect
