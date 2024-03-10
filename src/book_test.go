@@ -128,7 +128,7 @@ func TestExtractPDFTitle(t *testing.T) {
 	assert.NoError(t, err)
 	defer os.Remove(tempfile.Name())
 
-	srcfile, err := os.Open("../example.pdf")
+	srcfile, err := os.Open("../fixture/example.pdf")
 	assert.NoError(t, err)
 	defer srcfile.Close()
 	content, err := io.ReadAll(srcfile)
@@ -159,7 +159,7 @@ func TestWriteBlankMetaFile(t *testing.T) {
 	defer os.Remove(tempfile.Name())
 
 	// PDFタイトルを取得する関係で、中身を実際のPDFにしておく
-	srcfile, err := os.Open("../example.pdf")
+	srcfile, err := os.Open("../fixture/example.pdf")
 	assert.NoError(t, err)
 	defer srcfile.Close()
 	content, err := io.ReadAll(srcfile)

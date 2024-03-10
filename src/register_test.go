@@ -13,7 +13,7 @@ func TestRegister(t *testing.T) {
 	assert.NoError(t, err)
 	defer os.Remove(tempfile.Name())
 
-	samplefile, err := os.Open("../example.pdf")
+	samplefile, err := os.Open("../fixture/example.pdf")
 	assert.NoError(t, err)
 	defer samplefile.Close()
 	content, err := io.ReadAll(samplefile)
