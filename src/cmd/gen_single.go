@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"os"
 
 	shelf "github.com/kijimaD/shelf/src"
 	"github.com/urfave/cli/v2"
@@ -17,10 +18,11 @@ var CmdGenSingle = &cli.Command{
 
 func runGenSingle(c *cli.Context) error {
 	if c.Args().Get(0) == "" {
-		return errors.New("gensingle [FILE]")
+		return errors.New("gensingle [DOC PATH]")
 	}
 	filename := c.Args().Get(0)
-	err := shelf.Register(filename)
+	f, err := os.Open(filename)
+	_, err = shelf.Register(f)
 	if err != nil {
 		return err
 	}

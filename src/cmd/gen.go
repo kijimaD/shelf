@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	shelf "github.com/kijimaD/shelf/src"
@@ -32,7 +33,11 @@ func runGen(c *cli.Context) error {
 			continue
 		}
 		filePath := filepath.Join(dir, file.Name())
-		if err := shelf.Register(filePath); err != nil {
+		f, err := os.Open(filePath)
+		if err != nil {
+			return err
+		}
+		if _, err := shelf.Register(f); err != nil {
 			return err
 		}
 	}
