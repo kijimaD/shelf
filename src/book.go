@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
+	"github.com/unidoc/unipdf/v3/model"
 )
 
 const ShelfRegexp = `^(?P<id>\w{15})_(?P<base>.*)\.\w*$`
@@ -22,6 +23,7 @@ func NewBookID(t time.Time) BookID {
 
 // shelfフォーマットを満たすファイル
 // "{id}_{base}.{ext}"
+// baseは人が見て識別する用で、プログラム側からは参照しない
 type Book struct {
 	File os.File
 	Meta Meta
@@ -99,6 +101,23 @@ func (b *Book) MetaPath() (string, error) {
 	filename := fmt.Sprintf("%s.toml", id)
 
 	return filepath.Join(dir, filename), nil
+}
+
+func (b *Book) ExtractPDFTitle() (string, error) {
+	pdfReader, err := model.NewPdfReader(&b.File)
+	if err != nil {
+		return "", err
+	}
+
+	pdfInfo, err := pdfReader.GetPdfInfo()
+	if err != nil {
+		return "", err
+	}
+	if pdfInfo.Title != nil {
+		return pdfInfo.Title.Decoded(), nil
+	}
+
+	return "", nil
 }
 
 // IDを返す

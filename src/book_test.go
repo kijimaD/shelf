@@ -1,6 +1,7 @@
 package shelf
 
 import (
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -118,4 +119,25 @@ func TestLoadMetaData(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Error(t, b.LoadMetaData())
 	})
+}
+
+func TestExtractPDFTitle(t *testing.T) {
+	tempfile, err := os.CreateTemp(os.TempDir(), "20010101T010101_*.pdf")
+	assert.NoError(t, err)
+	defer os.Remove(tempfile.Name())
+
+	srcfile, err := os.Open("../example.pdf")
+	assert.NoError(t, err)
+	defer srcfile.Close()
+	content, err := ioutil.ReadAll(srcfile)
+	assert.NoError(t, err)
+
+	_, err = tempfile.Write(content)
+	assert.NoError(t, err)
+
+	b, err := NewBook(*tempfile)
+	assert.NoError(t, err)
+
+	_, err = b.ExtractPDFTitle()
+	assert.NoError(t, err)
 }
