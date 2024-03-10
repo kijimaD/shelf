@@ -28,7 +28,6 @@ func NewBookID(t time.Time) BookID {
 // baseは人が見て識別する用で、プログラム側からは参照しない
 type Book struct {
 	File os.File
-	Meta Meta
 }
 
 func NewBook(file os.File) (*Book, error) {
@@ -46,25 +45,24 @@ func NewBook(file os.File) (*Book, error) {
 	return &book, nil
 }
 
-func (b *Book) LoadMetaData() error {
+func (b *Book) GetMetaData() (*Meta, error) {
 	metapath, err := b.MetaPath()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	metafile, err := os.Open(metapath)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer metafile.Close()
 
 	meta := Meta{}
 	_, err = toml.NewDecoder(metafile).Decode(&meta)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	b.Meta = meta
 
-	return nil
+	return &meta, nil
 }
 
 func (b *Book) GetID() (BookID, error) {
@@ -127,7 +125,8 @@ func (b *Book) writeBlankMetaFile(w io.Writer) error {
 	title := "PDF Title"
 	extract, err := b.ExtractPDFTitle()
 	if err != nil {
-		log.Println("PDFタイトルを取得できなかった")
+		id, _ := b.GetID()
+		log.Printf("PDFタイトルを取得できなかった。id: %s\n", id)
 	}
 	if extract != "" {
 		title = extract

@@ -1,7 +1,7 @@
 package shelf
 
 import (
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 	"testing"
@@ -107,8 +107,9 @@ func TestLoadMetaData(t *testing.T) {
 
 		b, err := NewBook(*tempfile)
 		assert.NoError(t, err)
-		assert.NoError(t, b.LoadMetaData())
-		assert.Equal(t, meta, b.Meta) // 読み込めている
+		loadedMeta, err := b.GetMetaData()
+		assert.NoError(t, err)
+		assert.Equal(t, meta, *loadedMeta)
 	})
 	t.Run("メタファイルがないときはエラーを返す", func(t *testing.T) {
 		tempfile, err := os.CreateTemp(os.TempDir(), "20010101T010101_*.pdf")
@@ -117,7 +118,8 @@ func TestLoadMetaData(t *testing.T) {
 
 		b, err := NewBook(*tempfile)
 		assert.NoError(t, err)
-		assert.Error(t, b.LoadMetaData())
+		_, err = b.GetMetaData()
+		assert.Error(t, err)
 	})
 }
 
@@ -129,7 +131,7 @@ func TestExtractPDFTitle(t *testing.T) {
 	srcfile, err := os.Open("../example.pdf")
 	assert.NoError(t, err)
 	defer srcfile.Close()
-	content, err := ioutil.ReadAll(srcfile)
+	content, err := io.ReadAll(srcfile)
 	assert.NoError(t, err)
 	_, err = tempfile.Write(content)
 	assert.NoError(t, err)
@@ -150,7 +152,7 @@ func TestWriteBlankMetaFile(t *testing.T) {
 	srcfile, err := os.Open("../example.pdf")
 	assert.NoError(t, err)
 	defer srcfile.Close()
-	content, err := ioutil.ReadAll(srcfile)
+	content, err := io.ReadAll(srcfile)
 	assert.NoError(t, err)
 	_, err = tempfile.Write(content)
 	assert.NoError(t, err)
@@ -167,7 +169,7 @@ func TestWriteBlankMetaFile(t *testing.T) {
 	// 再度開いて中身を確認する
 	metafile, err = os.Open(metafile.Name())
 	assert.NoError(t, err)
-	metacontent, err := ioutil.ReadAll(metafile)
+	metacontent, err := io.ReadAll(metafile)
 	assert.NoError(t, err)
 	expect := `title = "example"
 todo = "NONE"
