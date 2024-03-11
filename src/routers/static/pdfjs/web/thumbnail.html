@@ -1,0 +1,58 @@
+<html>
+    <head>
+        <script src="../build/pdf.mjs" type="module"></script>
+        <script type="module">
+         const queryParams = new URLSearchParams(window.location.search);
+         const paramFile = queryParams.get('file');
+         var url = paramFile;
+
+         // Loaded via <script> tag, create shortcut to access PDF.js exports.
+         var { pdfjsLib } = globalThis;
+
+         // The workerSrc property shall be specified.
+         pdfjsLib.GlobalWorkerOptions.workerSrc = '../build/pdf.worker.mjs';
+
+         // Asynchronous download of PDF
+         var loadingTask = pdfjsLib.getDocument(url);
+         loadingTask.promise.then(function(pdf) {
+
+             // Fetch the first page
+             var pageNumber = 1;
+             pdf.getPage(pageNumber).then(function(page) {
+
+                 var scale = 1.0;
+                 var viewport = page.getViewport({scale: scale});
+
+                 var canvas = document.getElementById('the-canvas');
+                 var context = canvas.getContext('2d');
+                 canvas.height = viewport.height;
+                 canvas.width = viewport.width;
+
+                 var renderContext = {
+                     canvasContext: context,
+                     viewport: viewport
+                 };
+                 var renderTask = page.render(renderContext);
+                 renderTask.promise.then(function () {
+                 });
+             });
+         }, function (reason) {
+             // PDF loading error
+             console.error(reason);
+         });
+        </script>
+        <style>
+         html, body {
+             height: 100%;
+             margin: 0;
+         }
+         .content {
+             height: 100%;
+             overflow: auto;
+         }
+        </style>
+    </head>
+    <body>
+        <canvas id="the-canvas" class="content"></canvas>
+    </body>
+</html>

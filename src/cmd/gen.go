@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -29,6 +30,9 @@ func runGen(c *cli.Context) error {
 		return err
 	}
 	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
 		if filepath.Ext(file.Name()) != shelf.DocExtension {
 			continue
 		}
@@ -38,6 +42,11 @@ func runGen(c *cli.Context) error {
 			return err
 		}
 		if _, err := shelf.Register(f); err != nil {
+			switch err {
+			case shelf.ErrAlreadyFormatted:
+				log.Printf("スキップ: %v %s", err, f.Name())
+				continue
+			}
 			return err
 		}
 	}

@@ -21,6 +21,8 @@ type AppConfig struct {
 	// ログレベル。この設定レベル以下のログは表示・保存しない。
 	// 多 <- "info" | "warn" | "error" -> 少
 	LogLevel LogLevel `env:"SQUALL_LOG_LEVEL" envDefault:"info"`
+	// ファイルサーブのベースとなるディレクトリ
+	ServeBase string `env:"SERVE_BASE" envDefault:"."`
 }
 
 func init() {

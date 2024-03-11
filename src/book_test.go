@@ -12,20 +12,20 @@ import (
 )
 
 func TestNewBookID(t *testing.T) {
-	assert.Equal(t, BookID("20011111T111111"), NewBookID(time.Date(2001, 11, 11, 11, 11, 11, 0, time.UTC)))
-	assert.Equal(t, BookID("20010203T040506"), NewBookID(time.Date(2001, 2, 3, 4, 5, 6, 0, time.UTC)))
+	assert.Equal(t, BookID("20011111T111111123456789"), NewBookID(time.Date(2001, 11, 11, 11, 11, 11, 123456789, time.UTC)))
+	assert.Equal(t, BookID("20010203T040506123456789"), NewBookID(time.Date(2001, 2, 3, 4, 5, 6, 123456789, time.UTC)))
 	// 桁埋めされている
-	assert.Equal(t, BookID("20010101T010101"), NewBookID(time.Date(2001, 1, 1, 1, 1, 1, 0, time.UTC)))
+	assert.Equal(t, BookID("20010101T010101123456789"), NewBookID(time.Date(2001, 1, 1, 1, 1, 1, 123456789, time.UTC)))
 }
 
 func TestExecuteShelfRegexp(t *testing.T) {
-	_, err := executeShelfRegexp("20010203T040506_hello.pdf")
+	_, err := executeShelfRegexp("20010203T040506000000000_hello.pdf")
 	assert.NoError(t, err)
 }
 
 func TestNewBook(t *testing.T) {
 	t.Run("取得できる", func(t *testing.T) {
-		tempfile, err := os.CreateTemp(os.TempDir(), "20010101T010101_*.pdf")
+		tempfile, err := os.CreateTemp(os.TempDir(), "20010101T010101000000000_*.pdf")
 		assert.NoError(t, err)
 		defer os.Remove(tempfile.Name())
 
@@ -44,7 +44,7 @@ func TestNewBook(t *testing.T) {
 
 func TestGetID(t *testing.T) {
 	t.Run("IDを取得できる", func(t *testing.T) {
-		tempfile, err := os.CreateTemp(os.TempDir(), "20010101T010101_*.pdf")
+		tempfile, err := os.CreateTemp(os.TempDir(), "20010101T010101000000000_*.pdf")
 		assert.NoError(t, err)
 		defer os.Remove(tempfile.Name())
 
@@ -52,27 +52,27 @@ func TestGetID(t *testing.T) {
 		assert.NoError(t, err)
 		id, err := b.GetID()
 		assert.NoError(t, err)
-		assert.Equal(t, BookID("20010101T010101"), id)
+		assert.Equal(t, BookID("20010101T010101000000000"), id)
 	})
 }
 
 func TestGetFullPath(t *testing.T) {
 	t.Run("", func(t *testing.T) {
-		tempfile, err := os.CreateTemp(os.TempDir(), "20010101T010101_*.pdf")
+		tempfile, err := os.CreateTemp(os.TempDir(), "20010101T010101000000000_*.pdf")
 		assert.NoError(t, err)
 		defer os.Remove(tempfile.Name())
 
 		b, err := NewBook(*tempfile)
 		assert.NoError(t, err)
 		fullpath := b.GetFullPath()
-		assert.Contains(t, fullpath, "/tmp/20010101T010101_")
+		assert.Contains(t, fullpath, "/tmp/20010101T010101000000000_")
 		assert.Contains(t, fullpath, ".pdf")
 	})
 }
 
 func TestMetaPath(t *testing.T) {
 	t.Run("", func(t *testing.T) {
-		tempfile, err := os.CreateTemp(os.TempDir(), "20010101T010101_*.pdf")
+		tempfile, err := os.CreateTemp(os.TempDir(), "20010101T010101000000000_*.pdf")
 		assert.NoError(t, err)
 		defer os.Remove(tempfile.Name())
 
@@ -80,28 +80,28 @@ func TestMetaPath(t *testing.T) {
 		assert.NoError(t, err)
 		metapath, err := b.MetaPath()
 		assert.NoError(t, err)
-		assert.Equal(t, "/tmp/20010101T010101.toml", metapath)
+		assert.Equal(t, "/tmp/20010101T010101000000000.toml", metapath)
 	})
 }
 
 func TestLoadMetaData(t *testing.T) {
 	t.Run("メタデータを読み込める", func(t *testing.T) {
-		tempfile, err := os.CreateTemp(os.TempDir(), "20010101T010101_*.pdf")
+		tempfile, err := os.CreateTemp(os.TempDir(), "20010101T010101000000000_*.pdf")
 		assert.NoError(t, err)
 		defer os.Remove(tempfile.Name())
 
-		metafile, err := os.CreateTemp(os.TempDir(), "20010101T010101.toml")
+		metafile, err := os.CreateTemp(os.TempDir(), "20010101T010101000000000.toml")
 		assert.NoError(t, err)
 		defer os.Remove(metafile.Name())
 		// CreateTempで作るファイルには末尾に番号がつくので、リネーム
-		newPath := filepath.Join(filepath.Dir(metafile.Name()), "20010101T010101.toml")
+		newPath := filepath.Join(filepath.Dir(metafile.Name()), "20010101T010101000000000.toml")
 		assert.NoError(t, os.Rename(metafile.Name(), newPath))
 		defer os.Remove(newPath)
 
 		meta := Meta{
-			Title: "hello",
-			TODO:  TODOTypeNONE,
-			Tags:  []string{"new"},
+			Title: GetPtr("hello"),
+			TODO:  GetPtr(TODOTypeNONE),
+			Tags:  GetPtr([]string{"new"}),
 		}
 		assert.NoError(t, toml.NewEncoder(metafile).Encode(meta))
 
@@ -111,8 +111,26 @@ func TestLoadMetaData(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, meta, *loadedMeta)
 	})
+	t.Run("メタファイルが空の場合エラーを返す", func(t *testing.T) {
+		tempfile, err := os.CreateTemp(os.TempDir(), "20010101T010101000000000_*.pdf")
+		assert.NoError(t, err)
+		defer os.Remove(tempfile.Name())
+
+		metafile, err := os.CreateTemp(os.TempDir(), "20010101T010101000000000.toml")
+		assert.NoError(t, err)
+		defer os.Remove(metafile.Name())
+		// CreateTempで作るファイルには末尾に番号がつくので、リネーム
+		newPath := filepath.Join(filepath.Dir(metafile.Name()), "20010101T010101000000000.toml")
+		assert.NoError(t, os.Rename(metafile.Name(), newPath))
+		defer os.Remove(newPath)
+
+		b, err := NewBook(*tempfile)
+		assert.NoError(t, err)
+		_, err = b.GetMetaData()
+		assert.Error(t, err)
+	})
 	t.Run("メタファイルがないときはエラーを返す", func(t *testing.T) {
-		tempfile, err := os.CreateTemp(os.TempDir(), "20010101T010101_*.pdf")
+		tempfile, err := os.CreateTemp(os.TempDir(), "20010101T010101000000000_*.pdf")
 		assert.NoError(t, err)
 		defer os.Remove(tempfile.Name())
 
@@ -124,7 +142,7 @@ func TestLoadMetaData(t *testing.T) {
 }
 
 func TestExtractPDFTitle(t *testing.T) {
-	tempfile, err := os.CreateTemp(os.TempDir(), "20010101T010101_*.pdf")
+	tempfile, err := os.CreateTemp(os.TempDir(), "20010101T010101000000000_*.pdf")
 	assert.NoError(t, err)
 	defer os.Remove(tempfile.Name())
 
@@ -149,12 +167,12 @@ func TestGenerateShelfPath(t *testing.T) {
 	defer os.Remove(tempfile.Name())
 
 	path := generateShelfPath(*tempfile, time.Date(2001, 11, 11, 11, 11, 11, 0, time.UTC))
-	assert.Contains(t, path, "/tmp/20011111T111111_test")
+	assert.Contains(t, path, "/tmp/20011111T111111000000000_test")
 	assert.Contains(t, path, ".pdf")
 }
 
 func TestWriteBlankMetaFile(t *testing.T) {
-	tempfile, err := os.CreateTemp(os.TempDir(), "20010101T010101_*.pdf")
+	tempfile, err := os.CreateTemp(os.TempDir(), "20010101T010101000000000_*.pdf")
 	assert.NoError(t, err)
 	defer os.Remove(tempfile.Name())
 
@@ -168,7 +186,7 @@ func TestWriteBlankMetaFile(t *testing.T) {
 	assert.NoError(t, err)
 
 	// 中身なしのメタファイル
-	metafile, err := os.CreateTemp(os.TempDir(), "20010101T010101.toml")
+	metafile, err := os.CreateTemp(os.TempDir(), "20010101T010101000000000.toml")
 	assert.NoError(t, err)
 	defer os.Remove(metafile.Name())
 

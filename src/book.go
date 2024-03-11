@@ -1,7 +1,10 @@
 package shelf
 
 import (
+	"bytes"
+	"encoding/base64"
 	"fmt"
+	"image/png"
 	"io"
 	"log"
 	"os"
@@ -11,16 +14,29 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/unidoc/unipdf/v3/model"
+	"github.com/unidoc/unipdf/v3/render"
 )
 
-const ShelfRegexp = `^(?P<id>\w{15})_(?P<base>.*)\.\w*$`
+const (
+	ShelfRegexp   = `^(?P<id>\w{24})_(?P<base>.*)\.pdf$`
+	IDFormat      = "20060102T150405"
+	DocExtension  = ".pdf"
+	MetaExtension = ".toml"
+)
+
+var (
+	ErrInputDir    = fmt.Errorf("ファイルを入力を想定している箇所でディレクトリが入力された")
+	ErrInputNotPDF = fmt.Errorf("PDF以外が入力された")
+)
 
 // ファイル名の一部となるID
 // 読み書きで使う
 type BookID string
 
 func NewBookID(t time.Time) BookID {
-	return BookID(t.Format(IDFormat))
+	nano := t.Nanosecond()
+	formatted := fmt.Sprintf("%s%09d", t.Format(IDFormat), nano)
+	return BookID(formatted)
 }
 
 // shelfフォーマットを満たすファイル
@@ -32,12 +48,18 @@ type Book struct {
 
 // shelfフォーマットを満たすファイルなのを確認して初期化する
 func NewBook(file os.File) (*Book, error) {
-	book := Book{File: file}
-
+	if filepath.Ext(file.Name()) != DocExtension {
+		return nil, ErrInputNotPDF
+	}
 	fileinfo, err := file.Stat()
 	if err != nil {
 		return nil, err
 	}
+	if fileinfo.IsDir() {
+		return nil, ErrInputDir
+	}
+
+	book := Book{File: file}
 	_, err = executeShelfRegexp(fileinfo.Name())
 	if err != nil {
 		return nil, err
@@ -61,6 +83,9 @@ func (b *Book) GetMetaData() (*Meta, error) {
 	_, err = toml.NewDecoder(metafile).Decode(&meta)
 	if err != nil {
 		return nil, err
+	}
+	if meta.Title == nil || meta.TODO == nil || meta.Tags == nil {
+		return nil, fmt.Errorf("メタファイルから取得できなかった項目がある")
 	}
 
 	return &meta, nil
@@ -123,9 +148,9 @@ func (b *Book) writeBlankMetaFile(w io.Writer) error {
 	}
 
 	meta := Meta{
-		Title: title,
-		TODO:  TODOTypeNONE,
-		Tags:  []string{"new"},
+		Title: GetPtr(title),
+		TODO:  GetPtr(TODOTypeNONE),
+		Tags:  GetPtr([]string{"new"}),
 	}
 	err = toml.NewEncoder(w).Encode(meta)
 	if err != nil {
@@ -133,6 +158,35 @@ func (b *Book) writeBlankMetaFile(w io.Writer) error {
 	}
 
 	return nil
+}
+
+func (b *Book) ExtractImageBase64() (string, error) {
+	// PDFファイルを解析
+	pdfReader, err := model.NewPdfReader(&b.File)
+	if err != nil {
+		return "", err
+	}
+
+	// ページを抽出
+	pageNum := 1
+	page, err := pdfReader.GetPage(pageNum)
+	if err != nil {
+		return "", err
+	}
+
+	device := render.NewImageDevice()
+	image, err := device.Render(page)
+	if err != nil {
+		return "", err
+	}
+	var buf bytes.Buffer
+	if err := png.Encode(&buf, image); err != nil {
+		return "", err
+	}
+	str := buf.Bytes()
+	imgBase64Str := base64.StdEncoding.EncodeToString(str)
+
+	return imgBase64Str, nil
 }
 
 // shelf対応のパスに変換して返す

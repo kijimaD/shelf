@@ -6,10 +6,20 @@ import (
 	"time"
 )
 
+var (
+	ErrAlreadyFormatted = fmt.Errorf("すでにフォーマットを満たしている")
+)
+
 // 入力パスに対して、ID付きファイル名にリネーム + メタファイルの作成
 func Register(originfile *os.File) (*Book, error) {
+	// すでにフォーマットを満たしていたら(=エラーが出なければ)終了
+	_, err := NewBook(*originfile)
+	if err == nil {
+		return nil, ErrAlreadyFormatted
+	}
+
 	newpath := generateShelfPath(*originfile, time.Now())
-	err := os.Rename(originfile.Name(), newpath)
+	err = os.Rename(originfile.Name(), newpath)
 	if err != nil {
 		return nil, err
 	}

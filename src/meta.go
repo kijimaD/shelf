@@ -10,7 +10,7 @@ var (
 )
 
 type Meta struct {
-	Title string   `toml:"title"`
-	TODO  TODOType `toml:"todo"`
-	Tags  []string `toml:"tags"`
+	Title *string   `toml:"title"`
+	TODO  *TODOType `toml:"todo"`
+	Tags  *[]string `toml:"tags"`
 }
