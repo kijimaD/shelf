@@ -15,6 +15,8 @@ import (
 //go:embed static/*
 var staticFS embed.FS
 
+var tmpl *template.Template
+
 type Content struct {
 	Views []shelf.View
 	Tags  []string // ユニークなタグ一覧
@@ -26,7 +28,7 @@ func RunServer() error {
 
 	dirname, err := filepath.Abs(".")
 	if err != nil {
-		log.Fatalf("Could not get absolute path to directory: %s: %s", dirname, err.Error())
+		return err
 	}
 	fileServer := http.StripPrefix("/dir/", http.FileServer(http.Dir(dirname)))
 	http.Handle("/dir/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -37,6 +39,11 @@ func RunServer() error {
 		}
 	}))
 
+	tmpl, err = template.ParseFS(staticFS, "static/templates/*.html")
+	if err != nil {
+		return err
+	}
+
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", Config.Port), nil); err != nil {
 		return err
 	}
@@ -45,7 +52,6 @@ func RunServer() error {
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
-	t := template.Must(template.ParseFiles("templates/index.html"))
 	q := r.URL.Query().Get("q")
 
 	views := shelf.GenerateViews(Config.ServeBase)
@@ -57,7 +63,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		Views: views,
 		Tags:  shelf.UniqTags(views),
 	}
-	if err := t.Execute(w, content); err != nil {
+	if err := tmpl.ExecuteTemplate(w, "index.html", content); err != nil {
 		log.Fatal(err)
 	}
 }
