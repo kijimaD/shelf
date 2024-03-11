@@ -17,6 +17,7 @@ var staticFS embed.FS
 
 type Content struct {
 	Views []shelf.View
+	Tags  []string // ユニークなタグ一覧
 }
 
 func RunServer() error {
@@ -52,7 +53,10 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		views = shelf.FilterViewsByTag(q, views)
 	}
 
-	content := Content{Views: views}
+	content := Content{
+		Views: views,
+		Tags:  shelf.UniqTags(views),
+	}
 	if err := t.Execute(w, content); err != nil {
 		log.Fatal(err)
 	}

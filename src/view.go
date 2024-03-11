@@ -67,3 +67,20 @@ func FilterViewsByTag(tag string, views []View) []View {
 
 	return newviews
 }
+
+func UniqTags(views []View) []string {
+	uniq := []string{}
+	m := make(map[string]bool)
+
+	for _, view := range views {
+		for _, tag := range *view.Meta.Tags {
+			if !m[tag] {
+				m[tag] = true
+				uniq = append(uniq, tag)
+			}
+		}
+
+	}
+
+	return uniq
+}
