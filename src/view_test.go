@@ -32,7 +32,7 @@ func TestGenerateViews(t *testing.T) {
 		meta := Meta{
 			Title: GetPtr("hello1"),
 			TODO:  GetPtr(TODOTypeNONE),
-			Tags:  GetPtr([]string{"new"}),
+			Tags:  GetPtr([]string{"one"}),
 		}
 		assert.NoError(t, toml.NewEncoder(f).Encode(meta))
 	}
@@ -49,7 +49,7 @@ func TestGenerateViews(t *testing.T) {
 		meta := Meta{
 			Title: GetPtr("hello2"),
 			TODO:  GetPtr(TODOTypeNONE),
-			Tags:  GetPtr([]string{"new"}),
+			Tags:  GetPtr([]string{"two"}),
 		}
 		assert.NoError(t, toml.NewEncoder(f).Encode(meta))
 	}
@@ -58,4 +58,19 @@ func TestGenerateViews(t *testing.T) {
 	assert.Equal(t, 2, len(views))
 	assert.Equal(t, "hello1", *views[0].Meta.Title)
 	assert.Equal(t, "hello2", *views[1].Meta.Title)
+
+	{
+		searchOne := FilterViewsByTag("one", views)
+		assert.Equal(t, 1, len(searchOne))
+		assert.Equal(t, "hello1", *searchOne[0].Meta.Title)
+	}
+	{
+		searchTwo := FilterViewsByTag("two", views)
+		assert.Equal(t, 1, len(searchTwo))
+		assert.Equal(t, "hello2", *searchTwo[0].Meta.Title)
+	}
+	{
+		search := FilterViewsByTag("NOT FOUND", views)
+		assert.Equal(t, 0, len(search))
+	}
 }

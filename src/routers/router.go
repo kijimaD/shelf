@@ -45,7 +45,13 @@ func RunServer() error {
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	t := template.Must(template.ParseFiles("templates/index.html"))
+	q := r.URL.Query().Get("q")
+
 	views := shelf.GenerateViews(Config.ServeBase)
+	if q != "" {
+		views = shelf.FilterViewsByTag(q, views)
+	}
+
 	content := Content{Views: views}
 	if err := t.Execute(w, content); err != nil {
 		log.Fatal(err)

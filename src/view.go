@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"slices"
 )
 
 type View struct {
@@ -53,4 +54,16 @@ func GenerateViews(dirpath string) []View {
 	}
 
 	return views
+}
+
+func FilterViewsByTag(tag string, views []View) []View {
+	newviews := []View{}
+
+	for _, view := range views {
+		if slices.Contains(*view.Meta.Tags, tag) {
+			newviews = append(newviews, view)
+		}
+	}
+
+	return newviews
 }
