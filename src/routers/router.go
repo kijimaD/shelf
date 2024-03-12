@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	shelf "github.com/kijimaD/shelf/src"
@@ -51,13 +52,29 @@ func RunServer() error {
 	return nil
 }
 
+const (
+	defaultLimit = 20
+)
+
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query().Get("q")
+	limit := r.URL.Query().Get("limit")
 
 	views := shelf.GenerateViews(Config.ServeBase)
 	if q != "" {
 		views = shelf.FilterViewsByTag(q, views)
 	}
+
+	limitLen := defaultLimit
+	if limit != "" {
+		i, err := strconv.Atoi(limit)
+		if err != nil {
+			log.Print(err)
+		}
+		limitLen = i
+	}
+	idx := min(len(views), limitLen)
+	views = views[:idx]
 
 	content := Content{
 		Views: views,

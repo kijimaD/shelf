@@ -36,6 +36,7 @@ type BookID string
 func NewBookID(t time.Time) BookID {
 	nano := t.Nanosecond()
 	formatted := fmt.Sprintf("%s%09d", t.Format(IDFormat), nano)
+
 	return BookID(formatted)
 }
 
