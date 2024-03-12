@@ -19,8 +19,9 @@ var staticFS embed.FS
 var tmpl *template.Template
 
 type Content struct {
-	Views []shelf.View
-	Tags  []string // ユニークなタグ一覧
+	Views      []shelf.View
+	Tags       []string // ユニークなタグ一覧
+	LastCursor shelf.BookID
 }
 
 func RunServer() error {
@@ -58,13 +59,18 @@ const (
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query().Get("q")
+	cursor := r.URL.Query().Get("cursor")
 	limit := r.URL.Query().Get("limit")
 
 	views := shelf.GenerateViews(Config.ServeBase)
+
 	if q != "" {
 		views = shelf.FilterViewsByTag(q, views)
 	}
 
+	if cursor != "" {
+		views = shelf.SkipCursor(cursor, views)
+	}
 	limitLen := defaultLimit
 	if limit != "" {
 		i, err := strconv.Atoi(limit)
@@ -76,11 +82,18 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	idx := min(len(views), limitLen)
 	views = views[:idx]
 
+	var lastCursor shelf.BookID
+	if len(views) > 0 {
+		lastCursor = views[len(views)-1].ID
+	}
 	content := Content{
-		Views: views,
-		Tags:  shelf.UniqTags(views),
+		Views:      views,
+		Tags:       shelf.UniqTags(views),
+		LastCursor: lastCursor,
 	}
 	if err := tmpl.ExecuteTemplate(w, "index.html", content); err != nil {
 		log.Fatal(err)
 	}
+
+	return
 }
