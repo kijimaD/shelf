@@ -9,6 +9,7 @@ import (
 )
 
 type View struct {
+	ID       BookID
 	FilePath string
 	Meta     Meta
 }
@@ -46,7 +47,12 @@ func GenerateViews(dirpath string) []View {
 			log.Println("メタ情報がなかった")
 			continue
 		}
+		id, err := book.GetID()
+		if err != nil {
+			log.Fatal(err)
+		}
 		view := View{
+			ID:       id,
 			FilePath: book.GetFullPath(),
 			Meta:     *meta,
 		}
@@ -66,6 +72,25 @@ func FilterViewsByTag(tag string, views []View) []View {
 	}
 
 	return newviews
+}
+
+// |    discard     | return |
+// |<------->|cursor|<------>|
+func SkipCursor(id string, views []View) []View {
+	ids := []string{}
+
+	for _, view := range views {
+		ids = append(ids, string(view.ID))
+		if len(views) > 0 {
+			// 先頭を削除
+			views = views[1:]
+		}
+		if BookID(id) == view.ID {
+			break
+		}
+	}
+
+	return views
 }
 
 func UniqTags(views []View) []string {
