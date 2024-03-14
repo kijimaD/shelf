@@ -54,7 +54,7 @@ func RunServer() error {
 }
 
 const (
-	defaultLimit = 20
+	defaultLimit = 30
 )
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
