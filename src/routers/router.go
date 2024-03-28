@@ -63,6 +63,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	limit := r.URL.Query().Get("limit")
 
 	views := shelf.GenerateViews(Config.ServeBase)
+	tags := shelf.UniqTags(views)
 
 	if q != "" {
 		views = shelf.FilterViewsByTag(q, views)
@@ -88,7 +89,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	content := Content{
 		Views:      views,
-		Tags:       shelf.UniqTags(views),
+		Tags:       tags,
 		LastCursor: lastCursor,
 	}
 	if err := tmpl.ExecuteTemplate(w, "index.html", content); err != nil {

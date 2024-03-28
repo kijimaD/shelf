@@ -99,6 +99,9 @@ func UniqTags(views []View) []string {
 
 	for _, view := range views {
 		for _, tag := range *view.Meta.Tags {
+			if tag == "" {
+				continue
+			}
 			if !m[tag] {
 				m[tag] = true
 				uniq = append(uniq, tag)
