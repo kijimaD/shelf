@@ -33,3 +33,15 @@ and open http://localhost:8020/
 ## image
 
 ![](./images/top.png)
+
+## help
+
+```
+$ shelf print
+
+web             start shelf app server          web
+gen             generate files in directory     generate [DIRECTORY]
+gensingle       generate file                   gensingle [FILE]
+extract         extract image                   extract [PDF]
+print           print all command description   print
+```

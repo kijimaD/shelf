@@ -14,11 +14,13 @@ func NewMainApp() *cli.App {
 	app.Version = "v0.0.0"
 	app.EnableBashCompletion = true
 	app.DefaultCommand = CmdWeb.Name
+	app.Copyright = "(c) 2024 Kijima Daigo"
 	app.Commands = []*cli.Command{
 		CmdWeb,
 		CmdGen,
 		CmdGenSingle,
 		CmdExtractImage,
+		CmdPrint,
 	}
 
 	return app

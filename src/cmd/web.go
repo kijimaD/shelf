@@ -7,8 +7,8 @@ import (
 
 var CmdWeb = &cli.Command{
 	Name:        "web",
-	Usage:       "server",
-	Description: "start shelf server",
+	Usage:       "web",
+	Description: "start shelf app server",
 	Action:      runWeb,
 	Flags:       []cli.Flag{},
 }
