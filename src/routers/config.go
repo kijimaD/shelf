@@ -10,7 +10,7 @@ var Config AppConfig
 
 type AppConfig struct {
 	// サーバを起動するホスト.
-	Host string `env:"HOST" envDefault:"localhost"`
+	Host string `env:"HOST" envDefault:"0.0.0.0"`
 	// サーバを起動するポート.
 	Port int `env:"PORT" envDefault:"8020"`
 	// サーバを起動するアドレス.
