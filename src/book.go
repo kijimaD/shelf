@@ -40,7 +40,7 @@ func NewBookID(t time.Time) BookID {
 	return BookID(formatted)
 }
 
-// shelfフォーマットを満たすファイル
+// shelfフォーマットを満たす元ファイル(PDFなど)
 // "{id}_{base}.{ext}"
 // baseは人が見て識別する用で、プログラム側からは参照しない
 type Book struct {
@@ -69,6 +69,7 @@ func NewBook(file os.File) (*Book, error) {
 	return &book, nil
 }
 
+// メタデータファイルからメタデータを取得する
 func (b *Book) GetMetaData() (*Meta, error) {
 	metapath, err := b.MetaPath()
 	if err != nil {
@@ -92,6 +93,7 @@ func (b *Book) GetMetaData() (*Meta, error) {
 	return &meta, nil
 }
 
+// ファイルのIDを取得する
 func (b *Book) GetID() (BookID, error) {
 	fileinfo, err := b.File.Stat()
 	if err != nil {
@@ -106,10 +108,12 @@ func (b *Book) GetID() (BookID, error) {
 	return BookID(id), nil
 }
 
+// ファイルのフルパスを取得する
 func (b *Book) GetFullPath() string {
 	return b.File.Name()
 }
 
+// メタデータファイルのパスを取得する
 func (b *Book) MetaPath() (string, error) {
 	fullpath := b.GetFullPath()
 	dir := filepath.Dir(fullpath)

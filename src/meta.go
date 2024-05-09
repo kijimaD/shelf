@@ -9,6 +9,7 @@ var (
 	TODOTypeDONE TODOType = "DONE"
 )
 
+// 1ドキュメントがもつメタ情報
 type Meta struct {
 	Title *string   `toml:"title"`
 	TODO  *TODOType `toml:"todo"`
