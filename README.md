@@ -17,15 +17,16 @@ $ ls
 aa.pdf
 bb.pdf
 
-$ shelf gen . # generate shelf file schema(warn: renaming pdf occurs!)
+# generate shelf file schema(warn: renaming pdf occurs!)
+$ shelf gen .
 
 $ ls
 20240311T213221070837339_aa.pdf
-20240311T213221070837339.toml
 20240311T213221080079018_bb.pdf
-20240311T213221080079018.toml
+index.toml
 
-$ shelf web   # start server
+# start shelf server
+$ shelf web
 ```
 
 and open http://localhost:8020/
