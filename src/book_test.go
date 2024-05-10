@@ -232,7 +232,7 @@ func TestAppendMeta(t *testing.T) {
 	assert.NoError(t, b.AppendMeta(metas)) // IDがかぶっていると登録しない
 	assert.Equal(t, 3, len(metas))
 
-	expectKeys := []BookID{
+	expectKeys := []string{
 		"20240310T224413832103518",
 		"20240310T224413832109999",
 		"20010101T010101000000000",

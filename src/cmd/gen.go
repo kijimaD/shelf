@@ -38,10 +38,11 @@ func runGen(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	metas, err := shelf.GetMetas(string(bytes))
+	oldMetas, err := shelf.GetMetas(string(bytes))
 	if err != nil {
 		return err
 	}
+	newMetas := shelf.Metas{}
 
 	for _, file := range files {
 		if file.IsDir() {
@@ -59,11 +60,17 @@ func runGen(c *cli.Context) error {
 		if err != nil {
 			return err
 		}
-		if err := book.AppendMeta(metas); err != nil {
+		if err := book.AppendMeta(newMetas); err != nil {
 			return err
 		}
 	}
-	if err := toml.NewEncoder(metafile).Encode(metas); err != nil {
+
+	// 新しく追加された分だけにする
+	for k, _ := range oldMetas {
+		delete(newMetas, k)
+	}
+
+	if err := toml.NewEncoder(metafile).Encode(newMetas); err != nil {
 		return err
 	}
 
