@@ -3,11 +3,9 @@ package shelf
 import (
 	"io"
 	"os"
-	"path/filepath"
 	"testing"
 	"time"
 
-	"github.com/BurntSushi/toml"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -63,74 +61,6 @@ func TestGetFullPath(t *testing.T) {
 		fullpath := b.GetFullPath()
 		assert.Contains(t, fullpath, "/tmp/20010101T010101000000000_")
 		assert.Contains(t, fullpath, ".pdf")
-	})
-}
-
-func TestMetaPath(t *testing.T) {
-	t.Run("", func(t *testing.T) {
-		tempfile, err := os.CreateTemp(os.TempDir(), "20010101T010101000000000_*.pdf")
-		assert.NoError(t, err)
-		defer os.Remove(tempfile.Name())
-
-		b := NewBook(*tempfile)
-		metapath, err := b.MetaPath()
-		assert.NoError(t, err)
-		assert.Equal(t, "/tmp/20010101T010101000000000.toml", metapath)
-	})
-}
-
-func TestLoadMetaData(t *testing.T) {
-	t.Run("メタデータを読み込める", func(t *testing.T) {
-		tempfile, err := os.CreateTemp(os.TempDir(), "20010101T010101000000000_*.pdf")
-		assert.NoError(t, err)
-		defer os.Remove(tempfile.Name())
-
-		metafile, err := os.CreateTemp(os.TempDir(), "20010101T010101000000000.toml")
-		assert.NoError(t, err)
-		defer os.Remove(metafile.Name())
-		// CreateTempで作るファイルには末尾に番号がつくので、リネーム
-		newPath := filepath.Join(filepath.Dir(metafile.Name()), "20010101T010101000000000.toml")
-		assert.NoError(t, os.Rename(metafile.Name(), newPath))
-		defer os.Remove(newPath)
-
-		meta := Meta{
-			Title: GetPtr("hello"),
-			TODO:  GetPtr(TODOTypeNONE),
-			Tags:  GetPtr([]string{"new"}),
-		}
-		assert.NoError(t, toml.NewEncoder(metafile).Encode(meta))
-
-		b := NewBook(*tempfile)
-		loadedMeta, err := b.GetMetaData()
-		assert.NoError(t, err)
-		assert.Equal(t, meta, *loadedMeta)
-	})
-	t.Run("メタファイルが空の場合エラーを返す", func(t *testing.T) {
-		tempfile, err := os.CreateTemp(os.TempDir(), "20010101T010101000000000_*.pdf")
-		assert.NoError(t, err)
-		defer os.Remove(tempfile.Name())
-
-		metafile, err := os.CreateTemp(os.TempDir(), "20010101T010101000000000.toml")
-		assert.NoError(t, err)
-		defer os.Remove(metafile.Name())
-		// CreateTempで作るファイルには末尾に番号がつくので、リネーム
-		newPath := filepath.Join(filepath.Dir(metafile.Name()), "20010101T010101000000000.toml")
-		assert.NoError(t, os.Rename(metafile.Name(), newPath))
-		defer os.Remove(newPath)
-
-		b := NewBook(*tempfile)
-		_, err = b.GetMetaData()
-		assert.Error(t, err)
-	})
-	t.Run("メタファイルがないときはエラーを返す", func(t *testing.T) {
-		tempfile, err := os.CreateTemp(os.TempDir(), "20010101T010101000000000_*.pdf")
-		assert.NoError(t, err)
-		defer os.Remove(tempfile.Name())
-
-		b := NewBook(*tempfile)
-		assert.NoError(t, err)
-		_, err = b.GetMetaData()
-		assert.Error(t, err)
 	})
 }
 

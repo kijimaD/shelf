@@ -75,30 +75,6 @@ func ValidFormat(file os.File) bool {
 	return true
 }
 
-// メタデータファイルからメタデータを取得する
-func (b *Book) GetMetaData() (*Meta, error) {
-	metapath, err := b.MetaPath()
-	if err != nil {
-		return nil, err
-	}
-	metafile, err := os.Open(metapath)
-	if err != nil {
-		return nil, err
-	}
-	defer metafile.Close()
-
-	meta := Meta{}
-	_, err = toml.NewDecoder(metafile).Decode(&meta)
-	if err != nil {
-		return nil, err
-	}
-	if meta.Title == nil || meta.TODO == nil || meta.Tags == nil {
-		return nil, fmt.Errorf("メタファイルから取得できなかった項目がある")
-	}
-
-	return &meta, nil
-}
-
 // ファイルのIDを取得する
 func (b *Book) GetID() (BookID, error) {
 	fileinfo, err := b.File.Stat()
@@ -117,16 +93,6 @@ func (b *Book) GetID() (BookID, error) {
 // ファイルのフルパスを取得する
 func (b *Book) GetFullPath() string {
 	return b.File.Name()
-}
-
-// メタデータファイルのパスを取得する
-func (b *Book) MetaPath() (string, error) {
-	fullpath := b.GetFullPath()
-	dir := filepath.Dir(fullpath)
-	id, _ := b.GetID()
-	filename := fmt.Sprintf("%s.toml", id)
-
-	return filepath.Join(dir, filename), nil
 }
 
 func (b *Book) ExtractPDFTitle() (string, error) {
