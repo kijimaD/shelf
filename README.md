@@ -31,6 +31,8 @@ $ shelf web
 
 and open http://localhost:8020/
 
+my real use repository: https://github.com/kijimaD/mypdfs
+
 ## image
 
 ![](./images/top.png)

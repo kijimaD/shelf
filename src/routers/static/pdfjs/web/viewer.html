@@ -279,6 +279,15 @@ See https://github.com/adobe-type-tools/cmap-resources
                   <input type="number" id="pageNumber" class="toolbarField" title="Page" value="1" min="1" tabindex="15" data-l10n-id="pdfjs-page-input" autocomplete="off">
                 </span>
                 <span id="numPages" class="toolbarLabel"></span>
+                <script>
+                 function bookmark() {
+                     const zoom = 150;
+                     const page = PDFViewerApplication.pdfViewer.currentPageNumber;
+                     var hash = window.location.hash;
+                     window.location.hash = `zoom=${zoom}&page=${page}`;
+                 };
+                </script>
+                <input type="button" value="BM" onclick="bookmark()" class="toolbarField" />
               </div>
               <div id="toolbarViewerRight">
                 <div id="editorModeButtons" class="splitToolbarButton toggled" role="radiogroup">
