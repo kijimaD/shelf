@@ -30,7 +30,7 @@ func runGen(c *cli.Context) error {
 		return err
 	}
 
-	metafile, err := os.OpenFile(shelf.MetaPath2, os.O_RDWR|os.O_CREATE, 0666)
+	metafile, err := os.OpenFile(shelf.MetaPath, os.O_RDWR|os.O_CREATE, 0666)
 	if err != nil {
 		return err
 	}

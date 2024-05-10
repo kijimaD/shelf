@@ -64,7 +64,7 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	cursor := r.URL.Query().Get("cursor")
 	limit := r.URL.Query().Get("limit")
 
-	metafile, err := os.Open(shelf.MetaPath2)
+	metafile, err := os.Open(shelf.MetaPath)
 	if err != nil {
 		log.Fatal(err)
 	}

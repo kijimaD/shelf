@@ -22,7 +22,7 @@ const (
 	IDFormat      = "20060102T150405"
 	DocExtension  = ".pdf"
 	MetaExtension = ".toml"
-	MetaPath2     = "index.toml" // TODO: 後でちゃんとした名前に直す
+	MetaPath      = "index.toml"
 )
 
 var (
