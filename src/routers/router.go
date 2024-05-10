@@ -4,8 +4,10 @@ import (
 	"embed"
 	"fmt"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -62,7 +64,19 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 	cursor := r.URL.Query().Get("cursor")
 	limit := r.URL.Query().Get("limit")
 
-	views := shelf.GenerateViews(Config.ServeBase)
+	metafile, err := os.Open(shelf.MetaPath2)
+	if err != nil {
+		log.Fatal(err)
+	}
+	bytes, err := ioutil.ReadAll(metafile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	metas, err := shelf.GetMetas(string(bytes))
+	if err != nil {
+		log.Fatal(err)
+	}
+	views := shelf.GenerateViews(Config.ServeBase, metas)
 	tags := shelf.UniqTags(views)
 
 	if q != "" {

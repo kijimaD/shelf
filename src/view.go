@@ -2,7 +2,6 @@
 package shelf
 
 import (
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -15,8 +14,8 @@ type View struct {
 	Meta     Meta
 }
 
-// ディレクトリから、メタデータを収集する
-func GenerateViews(dirpath string) []View {
+// メタデータを収集する
+func GenerateViews(dirpath string, metas Metas) []View {
 	views := []View{}
 	files, _ := os.ReadDir(dirpath)
 
@@ -35,22 +34,6 @@ func GenerateViews(dirpath string) []View {
 			continue
 		}
 		book := NewBook(*f)
-
-		metafile, err := os.Open(MetaPath2)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-		bytes, err := ioutil.ReadAll(metafile)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
-		metas, err := GetMetas(string(bytes))
-		if err != nil {
-			log.Println(err)
-			continue
-		}
 
 		id, err := book.GetID()
 		if err != nil {

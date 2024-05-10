@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/BurntSushi/toml"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,35 +25,22 @@ func TestGenerateViews(t *testing.T) {
 		_, err = f.Write(example)
 	}
 	{
-		fname := filepath.Join(tempdir, "20010101T010101123456789.toml")
-		f, err := os.Create(fname)
-		assert.NoError(t, err)
-		meta := Meta{
-			Title: GetPtr("hello1"),
-			TODO:  GetPtr(TODOTypeNONE),
-			Tags:  GetPtr([]string{"one"}),
-		}
-		assert.NoError(t, toml.NewEncoder(f).Encode(meta))
-	}
-	{
 		fname := filepath.Join(tempdir, "20010101T010102123456789_def.pdf")
 		f, err := os.Create(fname)
 		assert.NoError(t, err)
 		_, err = f.Write(example)
 	}
-	{
-		fname := filepath.Join(tempdir, "20010101T010102123456789.toml")
-		f, err := os.Create(fname)
-		assert.NoError(t, err)
-		meta := Meta{
-			Title: GetPtr("hello2"),
-			TODO:  GetPtr(TODOTypeNONE),
-			Tags:  GetPtr([]string{"two"}),
-		}
-		assert.NoError(t, toml.NewEncoder(f).Encode(meta))
-	}
 
-	views := GenerateViews(tempdir)
+	views := GenerateViews(tempdir, Metas{
+		"20010101T010101123456789": Meta{
+			Title: GetPtr("hello1"),
+			Tags:  GetPtr([]string{"one"}),
+		},
+		"20010101T010102123456789": Meta{
+			Title: GetPtr("hello2"),
+			Tags:  GetPtr([]string{"two"}),
+		},
+	})
 	assert.Equal(t, 2, len(views))
 	assert.Equal(t, "hello1", *views[0].Meta.Title)
 	assert.Equal(t, "hello2", *views[1].Meta.Title)
