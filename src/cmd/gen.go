@@ -65,7 +65,7 @@ func runGen(c *cli.Context) error {
 		}
 	}
 
-	// 新しく追加された分だけにする
+	// 新しく追加された分だけ書き込む
 	for k, _ := range oldMetas {
 		delete(newMetas, k)
 	}

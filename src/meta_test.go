@@ -1,10 +1,8 @@
 package shelf
 
 import (
-	"os"
 	"testing"
 
-	"github.com/BurntSushi/toml"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -36,9 +34,4 @@ tags = ["new"]
 		},
 	}
 	assert.Equal(t, expect, metas)
-
-	metafile, err := os.OpenFile(MetaPath, os.O_RDWR|os.O_CREATE, 0666)
-	assert.NoError(t, err)
-	err = toml.NewEncoder(metafile).Encode(metas)
-	assert.NoError(t, err)
 }

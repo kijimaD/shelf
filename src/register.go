@@ -10,7 +10,7 @@ var (
 	ErrAlreadyFormatted = fmt.Errorf("すでにフォーマットを満たしている")
 )
 
-// 入力パスに対して、ID付きファイル名にリネーム + メタファイルの作成
+// 入力パスに対して、ID付きファイル名にリネーム
 func Register(originfile *os.File) (*Book, error) {
 	path := ""
 
