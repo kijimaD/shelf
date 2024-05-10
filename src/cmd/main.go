@@ -18,7 +18,6 @@ func NewMainApp() *cli.App {
 	app.Commands = []*cli.Command{
 		CmdWeb,
 		CmdGen,
-		CmdGenSingle,
 		CmdExtractImage,
 		CmdPrint,
 	}
