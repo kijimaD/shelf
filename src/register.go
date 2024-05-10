@@ -12,39 +12,29 @@ var (
 
 // 入力パスに対して、ID付きファイル名にリネーム + メタファイルの作成
 func Register(originfile *os.File) (*Book, error) {
+	path := ""
+
 	// すでにフォーマットを満たしていたら(=エラーが出なければ)終了
-	_, err := NewBook(*originfile)
-	if err == nil {
-		return nil, ErrAlreadyFormatted
+	ok := ValidFormat(*originfile)
+	if ok {
+		// すでにフォーマットを満たす
+		path = originfile.Name()
+	} else {
+		// フォーマットを満たさない
+		path = generateShelfPath(*originfile, time.Now())
+		err := os.Rename(originfile.Name(), path)
+		if err != nil {
+			return nil, err
+		}
 	}
-
-	newpath := generateShelfPath(*originfile, time.Now())
-	err = os.Rename(originfile.Name(), newpath)
-	if err != nil {
-		return nil, err
-	}
-
-	// リネーム後のファイルを開く
-	shelfFile, err := os.Open(newpath)
+	shelfFile, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
 	if shelfFile == nil {
 		return nil, fmt.Errorf("新しいshelfFileが発見できなかった")
 	}
-	book, err := NewBook(*shelfFile)
-	metapath, err := book.MetaPath()
-	if err != nil {
-		return nil, err
-	}
-	metaFile, err := os.Create(metapath)
-	if err != nil {
-		return nil, err
-	}
-	err = book.writeBlankMetaFile(metaFile)
-	if err != nil {
-		return nil, err
-	}
+	book := NewBook(*shelfFile)
 
 	return book, nil
 }

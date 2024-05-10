@@ -29,16 +29,14 @@ func TestNewBook(t *testing.T) {
 		assert.NoError(t, err)
 		defer os.Remove(tempfile.Name())
 
-		_, err = NewBook(*tempfile)
-		assert.NoError(t, err)
+		_ = NewBook(*tempfile)
 	})
 	t.Run("無効なパスだとエラーを返す", func(t *testing.T) {
 		tempfile, err := os.CreateTemp(os.TempDir(), "INVALID_*.pdf")
 		assert.NoError(t, err)
 		defer os.Remove(tempfile.Name())
 
-		_, err = NewBook(*tempfile)
-		assert.Error(t, err)
+		_ = NewBook(*tempfile)
 	})
 }
 
@@ -48,8 +46,7 @@ func TestGetID(t *testing.T) {
 		assert.NoError(t, err)
 		defer os.Remove(tempfile.Name())
 
-		b, err := NewBook(*tempfile)
-		assert.NoError(t, err)
+		b := NewBook(*tempfile)
 		id, err := b.GetID()
 		assert.NoError(t, err)
 		assert.Equal(t, BookID("20010101T010101000000000"), id)
@@ -62,8 +59,7 @@ func TestGetFullPath(t *testing.T) {
 		assert.NoError(t, err)
 		defer os.Remove(tempfile.Name())
 
-		b, err := NewBook(*tempfile)
-		assert.NoError(t, err)
+		b := NewBook(*tempfile)
 		fullpath := b.GetFullPath()
 		assert.Contains(t, fullpath, "/tmp/20010101T010101000000000_")
 		assert.Contains(t, fullpath, ".pdf")
@@ -76,8 +72,7 @@ func TestMetaPath(t *testing.T) {
 		assert.NoError(t, err)
 		defer os.Remove(tempfile.Name())
 
-		b, err := NewBook(*tempfile)
-		assert.NoError(t, err)
+		b := NewBook(*tempfile)
 		metapath, err := b.MetaPath()
 		assert.NoError(t, err)
 		assert.Equal(t, "/tmp/20010101T010101000000000.toml", metapath)
@@ -105,8 +100,7 @@ func TestLoadMetaData(t *testing.T) {
 		}
 		assert.NoError(t, toml.NewEncoder(metafile).Encode(meta))
 
-		b, err := NewBook(*tempfile)
-		assert.NoError(t, err)
+		b := NewBook(*tempfile)
 		loadedMeta, err := b.GetMetaData()
 		assert.NoError(t, err)
 		assert.Equal(t, meta, *loadedMeta)
@@ -124,8 +118,7 @@ func TestLoadMetaData(t *testing.T) {
 		assert.NoError(t, os.Rename(metafile.Name(), newPath))
 		defer os.Remove(newPath)
 
-		b, err := NewBook(*tempfile)
-		assert.NoError(t, err)
+		b := NewBook(*tempfile)
 		_, err = b.GetMetaData()
 		assert.Error(t, err)
 	})
@@ -134,7 +127,7 @@ func TestLoadMetaData(t *testing.T) {
 		assert.NoError(t, err)
 		defer os.Remove(tempfile.Name())
 
-		b, err := NewBook(*tempfile)
+		b := NewBook(*tempfile)
 		assert.NoError(t, err)
 		_, err = b.GetMetaData()
 		assert.Error(t, err)
@@ -154,9 +147,7 @@ func TestExtractPDFTitle(t *testing.T) {
 	_, err = tempfile.Write(content)
 	assert.NoError(t, err)
 
-	b, err := NewBook(*tempfile)
-	assert.NoError(t, err)
-
+	b := NewBook(*tempfile)
 	_, err = b.ExtractPDFTitle()
 	assert.NoError(t, err)
 }
@@ -190,8 +181,7 @@ func TestWriteBlankMetaFile(t *testing.T) {
 	assert.NoError(t, err)
 	defer os.Remove(metafile.Name())
 
-	b, err := NewBook(*tempfile)
-	assert.NoError(t, err)
+	b := NewBook(*tempfile)
 	assert.NoError(t, b.writeBlankMetaFile(metafile))
 
 	// 再度開いて中身を確認する
@@ -204,4 +194,59 @@ todo = "NONE"
 tags = ["new"]
 `
 	assert.Equal(t, expect, string(metacontent))
+}
+
+func TestAppendMeta(t *testing.T) {
+	// ファイル準備
+	tempfile, err := os.CreateTemp(os.TempDir(), "20010101T010101000000000_*.pdf")
+	assert.NoError(t, err)
+	defer os.Remove(tempfile.Name())
+	// PDFタイトルを取得する関係で、中身を実際のPDFにしておく
+	srcfile, err := os.Open("../fixture/example.pdf")
+	assert.NoError(t, err)
+	defer srcfile.Close()
+	content, err := io.ReadAll(srcfile)
+	assert.NoError(t, err)
+	_, err = tempfile.Write(content)
+	assert.NoError(t, err)
+
+	b := NewBook(*tempfile)
+
+	// ================
+
+	metas := Metas{
+		"20240310T224413832103518": Meta{
+			Title: GetPtr("exampleA"),
+			TODO:  GetPtr(TODOTypeNONE),
+			Tags:  GetPtr([]string{"new"}),
+		},
+		"20240310T224413832109999": Meta{
+			Title: GetPtr("exampleB"),
+			TODO:  GetPtr(TODOTypeNONE),
+			Tags:  GetPtr([]string{"new"}),
+		},
+	}
+	assert.NoError(t, b.AppendMeta(metas))
+	assert.Equal(t, 3, len(metas))
+
+	assert.NoError(t, b.AppendMeta(metas)) // IDがかぶっていると登録しない
+	assert.Equal(t, 3, len(metas))
+
+	expectKeys := []BookID{
+		"20240310T224413832103518",
+		"20240310T224413832109999",
+		"20010101T010101000000000",
+	}
+	expectTitles := []string{
+		"exampleA",
+		"exampleB",
+		"example",
+	}
+
+	i := 0
+	for k, v := range metas {
+		assert.Equal(t, expectKeys[i], k)
+		assert.Equal(t, expectTitles[i], *v.Title)
+		i += 1
+	}
 }

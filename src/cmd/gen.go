@@ -3,10 +3,10 @@ package cmd
 import (
 	"errors"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 
+	"github.com/BurntSushi/toml"
 	shelf "github.com/kijimaD/shelf/src"
 	"github.com/urfave/cli/v2"
 )
@@ -25,10 +25,24 @@ func runGen(c *cli.Context) error {
 	}
 	dir := c.Args().Get(0)
 
-	files, err := ioutil.ReadDir(dir)
+	files, err := os.ReadDir(dir)
 	if err != nil {
 		return err
 	}
+
+	metafile, err := os.OpenFile(shelf.MetaPath2, os.O_RDWR|os.O_CREATE, 0666)
+	if err != nil {
+		return err
+	}
+	bytes, err := ioutil.ReadAll(metafile)
+	if err != nil {
+		return err
+	}
+	metas, err := shelf.GetMetas(string(bytes))
+	if err != nil {
+		return err
+	}
+
 	for _, file := range files {
 		if file.IsDir() {
 			continue
@@ -41,14 +55,16 @@ func runGen(c *cli.Context) error {
 		if err != nil {
 			return err
 		}
-		if _, err := shelf.Register(f); err != nil {
-			switch err {
-			case shelf.ErrAlreadyFormatted:
-				log.Printf("スキップ: %v %s", err, f.Name())
-				continue
-			}
+		book, err := shelf.Register(f)
+		if err != nil {
 			return err
 		}
+		if err := book.AppendMeta(metas); err != nil {
+			return err
+		}
+	}
+	if err := toml.NewEncoder(metafile).Encode(metas); err != nil {
+		return err
 	}
 
 	return nil

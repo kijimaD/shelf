@@ -27,10 +27,7 @@ func extractImage(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	book, err := shelf.NewBook(*f)
-	if err != nil {
-		return err
-	}
+	book := shelf.NewBook(*f)
 	base64, err := book.ExtractImageBase64()
 	if err != nil {
 		return err

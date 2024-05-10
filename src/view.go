@@ -33,11 +33,7 @@ func GenerateViews(dirpath string) []View {
 			log.Println("ファイルがnilだった")
 			continue
 		}
-		book, err := NewBook(*f)
-		if err != nil {
-			log.Println(err)
-			continue
-		}
+		book := NewBook(*f)
 		meta, err := book.GetMetaData()
 		if err != nil {
 			log.Println(err)

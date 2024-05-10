@@ -34,22 +34,3 @@ func TestRegister(t *testing.T) {
 	_, err = os.Stat(tempfile.Name())
 	assert.Error(t, err)
 }
-
-func TestRegisterDuplicateSkip_すでにフォーマットを満たしている場合はスキップする(t *testing.T) {
-	tempdir := t.TempDir()
-	fname := filepath.Join(tempdir, "20010101T010101123456789_abc.pdf")
-	tempfile, err := os.Create(fname)
-	assert.NoError(t, err)
-
-	samplefile, err := os.Open("../fixture/example.pdf")
-	assert.NoError(t, err)
-	defer samplefile.Close()
-	content, err := io.ReadAll(samplefile)
-	assert.NoError(t, err)
-	_, err = tempfile.Write(content)
-	assert.NoError(t, err)
-
-	_, err = Register(tempfile)
-	assert.Error(t, err)
-	assert.Equal(t, ErrAlreadyFormatted, err)
-}

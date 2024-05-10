@@ -18,7 +18,7 @@ type Meta struct {
 	Tags  *[]string `toml:"tags"`
 }
 
-type Metas map[BookID]Meta
+type Metas map[string]Meta
 
 func GetMetas(tomlContent string) (Metas, error) {
 	var metas Metas

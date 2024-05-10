@@ -22,6 +22,7 @@ const (
 	IDFormat      = "20060102T150405"
 	DocExtension  = ".pdf"
 	MetaExtension = ".toml"
+	MetaPath2     = "index.toml" // TODO: 後でちゃんとした名前に直す
 )
 
 var (
@@ -48,25 +49,30 @@ type Book struct {
 }
 
 // shelfフォーマットを満たすファイルなのを確認して初期化する
-func NewBook(file os.File) (*Book, error) {
+func NewBook(file os.File) *Book {
+	book := Book{File: file}
+
+	return &book
+}
+
+// IDフォーマットを満たすかを判定する
+func ValidFormat(file os.File) bool {
 	if filepath.Ext(file.Name()) != DocExtension {
-		return nil, ErrInputNotPDF
+		return false
 	}
 	fileinfo, err := file.Stat()
 	if err != nil {
-		return nil, err
+		return false
 	}
 	if fileinfo.IsDir() {
-		return nil, ErrInputDir
+		return false
 	}
-
-	book := Book{File: file}
 	_, err = executeShelfRegexp(fileinfo.Name())
 	if err != nil {
-		return nil, err
+		return false
 	}
 
-	return &book, nil
+	return true
 }
 
 // メタデータファイルからメタデータを取得する
@@ -140,7 +146,7 @@ func (b *Book) ExtractPDFTitle() (string, error) {
 	return "", nil
 }
 
-// 初期生成用にブランクのメタファイルを生成して書き込む
+// メタファイルにデフォルトのメタ情報を書き込む
 func (b *Book) writeBlankMetaFile(w io.Writer) error {
 	title := "PDF Title"
 	extract, err := b.ExtractPDFTitle()
@@ -160,6 +166,33 @@ func (b *Book) writeBlankMetaFile(w io.Writer) error {
 	err = toml.NewEncoder(w).Encode(meta)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (b *Book) AppendMeta(metas Metas) error {
+	title := "PDF Title"
+	extract, err := b.ExtractPDFTitle()
+	if err != nil {
+		id, _ := b.GetID()
+		log.Printf("PDFタイトルを取得できなかった。id: %s\n", id)
+	}
+	if extract != "" {
+		title = extract
+	}
+
+	id, err := b.GetID()
+	if err != nil {
+		return err
+	}
+
+	if _, ok := metas[string(id)]; !ok {
+		metas[string(id)] = Meta{
+			Title: GetPtr(title),
+			TODO:  GetPtr(TODOTypeNONE),
+			Tags:  GetPtr([]string{"new"}),
+		}
 	}
 
 	return nil
