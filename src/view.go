@@ -2,6 +2,7 @@
 package shelf
 
 import (
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -34,15 +35,23 @@ func GenerateViews(dirpath string) []View {
 			continue
 		}
 		book := NewBook(*f)
-		meta, err := book.GetMetaData()
+
+		metafile, err := os.Open(MetaPath2)
 		if err != nil {
 			log.Println(err)
 			continue
 		}
-		if meta == nil {
-			log.Println("メタ情報がなかった")
+		bytes, err := ioutil.ReadAll(metafile)
+		if err != nil {
+			log.Println(err)
 			continue
 		}
+		metas, err := GetMetas(string(bytes))
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+
 		id, err := book.GetID()
 		if err != nil {
 			log.Fatal(err)
@@ -50,7 +59,7 @@ func GenerateViews(dirpath string) []View {
 		view := View{
 			ID:       id,
 			FilePath: book.GetFullPath(),
-			Meta:     *meta,
+			Meta:     metas[string(id)],
 		}
 		views = append(views, view)
 	}
