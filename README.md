@@ -10,7 +10,7 @@ go install github.com/kijimaD/shelf@main
 
 ## how to use
 
-serve current directory PDF files.
+Shelf generate book config files, and serve PDF files.
 
 ```
 $ ls
