@@ -2,13 +2,13 @@
 
 shelf is PDF viewer. It manage bibliographic information on a file basis.
 
-## install
+## Install
 
 ```
 go install github.com/kijimaD/shelf@main
 ```
 
-## how to use
+## How to use
 
 Shelf generate book config files, and serve PDF files.
 
@@ -33,11 +33,11 @@ and open http://localhost:8020/
 
 my real use repository: https://github.com/kijimaD/mypdfs
 
-## image
+## Image
 
-![](./images/top.png)
+<img src="./images/top.png" width="50%">
 
-## help
+## Help
 
 ```
 $ shelf print
