@@ -16,7 +16,6 @@ function addBookmark() {
     );
     const zoom = parsedHash.get("zoom");
     const page = PDFViewerApplication.pdfViewer.currentPageNumber;
-    var hash = window.location.hash;
     window.location.hash = `zoom=${zoom}&page=${page}`;
 };
 
