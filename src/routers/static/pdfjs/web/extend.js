@@ -8,8 +8,12 @@ document.addEventListener("webviewerloaded", () => {
     });
 });
 
+// URLフラグメントを更新する
 function addBookmark() {
-    const zoom = 150;
+    const parsedHash = new URLSearchParams(
+        window.location.hash.substring(1)
+    );
+    const zoom = parsedHash.get("zoom");
     const page = PDFViewerApplication.pdfViewer.currentPageNumber;
     var hash = window.location.hash;
     window.location.hash = `zoom=${zoom}&page=${page}`;
