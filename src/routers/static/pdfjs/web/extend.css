@@ -18,3 +18,15 @@
 .toast.success {
   border-left: 3px solid var(--c-green);
 }
+
+.toast.one {
+  border-left: 3px solid var(--c-typography);
+}
+
+.toast.ten {
+  border-left: 3px solid var(--c-green);
+}
+
+.toast.hundred {
+  border-left: 3px solid var(--c-red);
+}

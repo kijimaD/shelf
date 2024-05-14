@@ -10,9 +10,16 @@ document.addEventListener("webviewerloaded", () => {
             const lapseTime = Math.round((Date.now() - lastTime) / 1000);
             const today = new Date();
             lastTime = Date.now();
-            
+
             const msg =  today.toLocaleTimeString("ja-JP") + ' [' + lapseTime + 's] ' + e.previous + 'p -> ' + e.pageNumber + 'p';
-            const content = { message: msg, cssName: "success" };
+            let cssName = "one";
+            if ((PDFViewerApplication.pdfViewer.currentPageNumber % 10) == 0) {
+                cssName = "ten"
+            }
+            if ((PDFViewerApplication.pdfViewer.currentPageNumber % 100) == 0) {
+                cssName = "hundred"
+            }
+            const content = { message: msg, cssName: cssName };
             setupToast(content);
         });
     });
