@@ -10,9 +10,9 @@
 }
 
 .toast {
-  display: flex;
   border: none;
   background-color: transparent;
+  margin-left: auto;
 }
 
 .toast.success {
