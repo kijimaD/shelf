@@ -1,0 +1,32 @@
+:root {
+  --c-grey: #606060;
+  --c-pale-grey: #B6B6B6;
+  --c-shadow-grey: #e5e5e5;
+  --c-bg-grey: #fafafa;
+  --c-typography: #2f2f2f;
+  --c-green: #46D763;
+  --c-red: #FE8964;
+  --c-white: #fff;
+}
+
+.toast {
+  display: flex;
+  border: none;
+  background-color: transparent;
+}
+
+.toast.success {
+  border-left: 3px solid var(--c-green);
+}
+
+.toast.one {
+  border-left: 3px solid var(--c-typography);
+}
+
+.toast.ten {
+  border-left: 3px solid var(--c-green);
+}
+
+.toast.hundred {
+  border-left: 3px solid var(--c-red);
+}
