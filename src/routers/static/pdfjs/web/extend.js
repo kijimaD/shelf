@@ -1,11 +1,17 @@
 // 独自拡張
 
+let lastTime = Date.now();
+
 document.addEventListener("webviewerloaded", () => {
     PDFViewerApplication.initializedPromise.then(() => {
         PDFViewerApplication.eventBus.on("pagechanging", (e) => {
             updatePageGauge();
 
-            const msg = e.previous + ' -> ' + e.pageNumber;
+            const lapseTime = Math.round((Date.now() - lastTime) / 1000);
+            const today = new Date();
+            lastTime = Date.now();
+            
+            const msg =  today.toLocaleTimeString("ja-JP") + ' [' + lapseTime + 's] ' + e.previous + 'p -> ' + e.pageNumber + 'p';
             const content = { message: msg, cssName: "success" };
             setupToast(content);
         });
@@ -42,7 +48,7 @@ const setupToast = ({ message, cssName }) => {
     toast.showPopover();
 
     // setTimeoutで一定時間経ったら自動的にポップオーバーを消す
-    const timer = setTimeout(() => removeToast(toast), 5000);
+    const timer = setTimeout(() => removeToast(toast), 1000 * 60 * 10);
     // timeoutを解除するためのtimerをdataset要素として設定する
     toast.dataset.timer = timer;
 
@@ -79,7 +85,7 @@ const alignToast = (withMoveAnim) => {
         toast.style.transition = withMoveAnim
                                ? "translate 0.2s linear, opacity 0.2s linear"
                                : "opacity 0.2s linear";
-        toast.style.translate = `0px ${(56 + 10) * index}px`;
+        toast.style.translate = `0px ${1 * index}em`;
         toast.style.opacity = 1;
     });
 };

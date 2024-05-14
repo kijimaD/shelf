@@ -9,43 +9,12 @@
   --c-white: #fff;
 }
 
-body {
-  font-family: sans-serif;
-  font-size: 16px;
-  color: var(--c-typography);
-  background-color: var(--c-bg-grey);
-}
-
-p {
-  margin: 0;
-}
-
-.container {
-  height: 50vh;
-}
-
 .toast {
   display: flex;
-  /* width: 300px; */
-  padding: 16px;
-  background-color: var(--c-white);
   border: none;
-  box-shadow: 0 4px 8px var(--c-shadow-grey);
-  opacity: 0;
-}
-
-.toast-content {
-  display: flex;
-  /* align-items: center; */
-  font-size: 14px;
-  font-weight: bold;
-  color: var(--c-typography);
+  background-color: transparent;
 }
 
 .toast.success {
   border-left: 3px solid var(--c-green);
-}
-
-.toast.error {
-  border-left: 3px solid var(--c-red);
 }
