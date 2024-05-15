@@ -8,11 +8,15 @@ document.addEventListener("webviewerloaded", () => {
             updatePageGauge();
 
             const lapseTime = Math.round((Date.now() - lastTime) / 1000);
+            const lapseTimePad = String(lapseTime).padStart(4, '0');
             const today = new Date();
             lastTime = Date.now();
 
-            const msg =  today.toLocaleTimeString("ja-JP") + ' [' + lapseTime + 's] ' + e.previous + 'p -> ' + e.pageNumber + 'p';
+            const msg =  today.toLocaleTimeString("ja-JP") + ' [' + lapseTimePad + 's] ' + e.previous + 'p -> ' + e.pageNumber + 'p';
             let cssName = "one";
+            if ((PDFViewerApplication.pdfViewer.currentPageNumber % 5) == 0) {
+                cssName = "five"
+            }
             if ((PDFViewerApplication.pdfViewer.currentPageNumber % 10) == 0) {
                 cssName = "ten"
             }

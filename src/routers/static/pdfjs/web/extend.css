@@ -7,6 +7,7 @@
   --c-green: #46D763;
   --c-red: #FE8964;
   --c-white: #fff;
+  --c-blue: #00ffff;
 }
 
 .toast {
@@ -15,18 +16,18 @@
   margin-left: auto;
 }
 
-.toast.success {
-  border-left: 3px solid var(--c-green);
+.toast.one {
+  border-left: 16px solid var(--c-typography);
 }
 
-.toast.one {
-  border-left: 3px solid var(--c-typography);
+.toast.five {
+  border-left: 16px solid var(--c-blue);
 }
 
 .toast.ten {
-  border-left: 3px solid var(--c-green);
+  border-left: 16px solid var(--c-green);
 }
 
 .toast.hundred {
-  border-left: 3px solid var(--c-red);
+  border-left: 16px solid var(--c-red);
 }
